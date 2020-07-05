@@ -6,12 +6,12 @@
 #include <sys/sem.h>
 #include <time.h>
 
-#define N 1000
 #define MAX 1
 
 typedef int semaphore;
 static semaphore Empty, Full, Mutex;
 int buffer[MAX], front= 0, rear =0, cnt=0;
+int N = 1000;
 struct timespec begin, end;
 
 int produce_item() {
@@ -97,7 +97,7 @@ void* consumer(void* arg) {
 	return 0;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 	pthread_t thread1;
 	pthread_t thread2;
 	double time;
@@ -108,6 +108,7 @@ int main() {
 		unsigned short int* array;
 	}arg;
 
+	N = atoi(argv[1]);
 	if ((Empty = semget(IPC_PRIVATE, 1, IPC_CREAT | 0666)) == -1) {
 		printf("semget_Empty Error\n");
 		return -1;
@@ -158,6 +159,4 @@ int main() {
 
 	printf("time : %f\n", time/N);
 	return 0;
-
 }
-
