@@ -6,7 +6,7 @@
 #include <sys/sem.h>
 #include <time.h>
 
-#define N 100
+#define N 1000
 #define MAX 1
 
 typedef int semaphore;
