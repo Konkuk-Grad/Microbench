@@ -7,21 +7,13 @@
 #include <sys/types.h>
 #include <time.h>
 
-#ifdef CLOCK_GETTIME
 struct timespec start_point, end_point;
-#else
-struct timeval start_point, end_point;
-#endif
 
 double measure = 0;
 pid_t pid1, pid2;
 
 void send_ping(){
-#ifdef CLOCK_GETTIME
-    clock_gettime(CLOCK_REALTIME, &start_point);
-#else
-    gettimeofday(&start_point, NULL);
-#endif
+    clock_gettime(CLOCK_MONOTONIC, &start_point);
     kill(pid2, SIGUSR1);
 }
 
@@ -30,11 +22,7 @@ void recv_ping(){
 }
 
 void recv_pong(){
-#ifdef CLOCK_GETTIME
-    clock_gettime(CLOCK_REALTIME, &end_point);
-#else
-    gettimeofday(&end_point, NULL);
-#endif
+    clock_gettime(CLOCK_MONOTONIC, &end_point);
 }
 
 int main(int argc, char *argv[]){
@@ -75,13 +63,8 @@ int main(int argc, char *argv[]){
         for(int i = 0; i < iter; i++){
             send_ping(); // Send pong to a child process
             pause(); // Wait until receiving pong from a child process
-#ifdef CLOCK_GETTIME
             measure += (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
-#else
-            measure += (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_usec - start_point.tv_usec) / 1000;
-#endif
         }
-        
     }
 
     measure /= iter;
