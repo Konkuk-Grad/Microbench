@@ -39,29 +39,56 @@ void recv_pong(){
 
 int main(int argc, char *argv[]){
 
+    int iter;
+
+    if(argc != 2){
+        printf("[Error] argc must be 2! (Input: %d)\n", argc);
+        return -1;
+    }
+
+    if(!atoi(argv[1])){
+        printf("[Error] argv[1] must be positive integer (Input: %s)\n", argv[1]);
+        return -1;
+    }
+
+    iter = atoi(argv[1]);
+
     if(!(pid2 = fork())){ // Child
-        pid1 = getppid(); // Parent
-        pid2 = getpid(); // Child
+        pid1 = getppid(); // Parent PID
+        pid2 = getpid(); // Child PID
+#ifdef DEBUGMSG
         printf("[C] Parent PID: %d, Child PID: %d\n", pid1, pid2);
+#endif
         signal(SIGUSR1, recv_ping);
-        pause();
+        while(1){ // Until getting SIGKILL, Infinity loop
+            pause();
+        }
         exit(0);
     } else { // Parent
-        pid1 = getpid();
+        pid1 = getpid(); // Parent PID
         signal(SIGUSR1, recv_pong);
+#ifdef DEBUGMSG
         printf("[P] Parent PID: %d, Child PID: %d\n", pid1, pid2);
-        sleep(3);
-        send_ping();
-        pause();
-    }
-#ifdef CLOCK_GETTIME
-    measure = (end_point.tv_sec - start_point.tv_sec) * 1000000000 + end_point.tv_nsec - start_point.tv_nsec;
-    measure /= 1000000;
-#else
-    measure = (end_point.tv_sec - start_point.tv_sec) * 1000000 + end_point.tv_usec - start_point.tv_usec;
-    measure /= 1000;
 #endif
-    printf("[P] measure time: %f ms\n", measure);
+        sleep(3); // Wait until setting a child process
+
+        for(int i = 0; i < iter; i++){
+            send_ping(); // Send pong to a child process
+            pause(); // Wait until receiving pong from a child process
+#ifdef CLOCK_GETTIME
+            measure += (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
+#else
+            measure += (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_usec - start_point.tv_usec) / 1000;
+#endif
+        }
+        
+    }
+
+    measure /= iter;
+#ifdef DEBUGMSG
+    printf("[P] measure time: ");
+#endif
+    printf("%f ms\n", measure);
 
     return 0;
 }
