@@ -7,7 +7,8 @@
 - Mutex/Semaphore: 이종빈, 장서연
  
 - IPC: 박성준
-
+  application code compile <br>
+  ``` $gcc -o <file_name> <file_name>.c -lrt ``` <br>
     (Signal을 제외한 나머지 환경은 Single Producer Single Consumer 환경에서 측정 진행)
 
 # 측정 환경
