@@ -9,14 +9,20 @@
 
 #define BUF_SIZE 1
 
+#define NOT_WORKING 0
+#define WORKING 1
+
 struct timespec start_point, end_point;
 
 double measure = 0;
 pid_t pid1, pid2;
 
+int flag = NOT_WORKING;
+
 void send_ping(){
     // clock_gettime(CLOCK_MONOTONIC, &start_point);
     kill(pid2, SIGUSR1);
+    flag = WORKING;
 }
 
 void recv_ping(){
@@ -30,6 +36,7 @@ void recv_ping(){
 void recv_pong(){
     // clock_gettime(CLOCK_MONOTONIC, &end_point);
     static int pong_count = 0;
+    flag = NOT_WORKING;
 #ifdef PPDEBUG
     printf("[DEBUG] pong_count: %d\n", ++pong_count);
 #endif
@@ -73,7 +80,14 @@ int main(int argc, char *argv[]){
         clock_gettime(CLOCK_MONOTONIC, &start_point);
         for(int i = 0; i < iter; i++){
             send_ping(); // Send pong to a child process
-            pause(); // Wait until receiving pong from a child process
+
+            /* Deadlock */
+            /* Signal pending bit is changed, but process is a wait state. */
+            /* Blocked State */
+            // pause(); // Wait until receiving pong from a child process
+            /* Busy wait */
+            while(flag);
+
             // measure += (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
         }
         clock_gettime(CLOCK_MONOTONIC, &end_point);
