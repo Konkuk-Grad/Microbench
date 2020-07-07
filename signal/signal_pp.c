@@ -20,11 +20,19 @@ void send_ping(){
 }
 
 void recv_ping(){
+    static int ping_count = 0;
+#ifdef PPDEBUG
+    printf("[DEBUG] ping_count: %d\n", ++ping_count);
+#endif    
     kill(pid1, SIGUSR1); // SEND PONG
 }
 
 void recv_pong(){
     // clock_gettime(CLOCK_MONOTONIC, &end_point);
+    static int pong_count = 0;
+#ifdef PPDEBUG
+    printf("[DEBUG] pong_count: %d\n", ++pong_count);
+#endif
 }
 
 int main(int argc, char *argv[]){
