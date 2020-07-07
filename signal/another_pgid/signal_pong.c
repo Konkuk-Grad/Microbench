@@ -13,9 +13,9 @@
 // Define
 struct msgbuf{
     long msgtype;
+    // long measure_time;
     pid_t pid;
 };
-
 
 double measure = 0;
 pid_t pid1, pid2;
@@ -51,6 +51,7 @@ int main(int argc, char *argv[]){
     printf("[Pong] Key: %d\n", key_id);
 
     pingbuf.msgtype = 2;
+    // pingbuf.measure_time = 0;
     pingbuf.pid = getpid();
     
     if(msgsnd(key_id, (void *)&pingbuf, sizeof(struct msgbuf), 0) == -1){
@@ -61,7 +62,7 @@ int main(int argc, char *argv[]){
     memset(&pingbuf, 0, sizeof(struct msgbuf));
 
     if(msgrcv(key_id, (void *)&pingbuf, sizeof(struct msgbuf), 1, 0) == -1){
-        perror("[Pong] msgrcv error: ");
+        perror("[Pong] msgrcv error");
         exit(0);
     }
 
@@ -69,8 +70,9 @@ int main(int argc, char *argv[]){
     pid2 = getpid(); // Pong
     printf("[Pong] Ping PID: %d, Pong PID: %d\n", pid1, pid2);
 
-    for(int i = 0; i < iter; i++){
-        signal(SIGUSR1, recv_ping);
+    signal(SIGUSR1, recv_ping);
+    while(1){
+        // printf("[Pong] wait for what?\n");
         pause();
     }
 
