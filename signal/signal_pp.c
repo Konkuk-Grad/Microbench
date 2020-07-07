@@ -73,8 +73,8 @@ int main(int argc, char *argv[]){
 
     // Calculate a total execution time
     measure = (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
-    measure /= iter;
-    
+    // measure /= iter;
+
 #ifdef DEBUGMSG
     printf("[P] (pid: %d) measure time\n", getpid());
 #endif
