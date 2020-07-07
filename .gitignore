@@ -3,3 +3,4 @@
 peda-session-*
 .vscode/*
 .vscode-*
+.gdb*
