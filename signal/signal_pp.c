@@ -7,13 +7,15 @@
 #include <sys/types.h>
 #include <time.h>
 
+#define BUF_SIZE 1
+
 struct timespec start_point, end_point;
 
 double measure = 0;
 pid_t pid1, pid2;
 
 void send_ping(){
-    clock_gettime(CLOCK_MONOTONIC, &start_point);
+    // clock_gettime(CLOCK_MONOTONIC, &start_point);
     kill(pid2, SIGUSR1);
 }
 
@@ -22,7 +24,7 @@ void recv_ping(){
 }
 
 void recv_pong(){
-    clock_gettime(CLOCK_MONOTONIC, &end_point);
+    // clock_gettime(CLOCK_MONOTONIC, &end_point);
 }
 
 int main(int argc, char *argv[]){
@@ -59,19 +61,25 @@ int main(int argc, char *argv[]){
         printf("[P] Parent PID: %d, Child PID: %d\n", pid1, pid2);
 #endif
         sleep(3); // Wait until setting a child process
-
+        // Measure a total execution time
+        clock_gettime(CLOCK_MONOTONIC, &start_point);
         for(int i = 0; i < iter; i++){
             send_ping(); // Send pong to a child process
             pause(); // Wait until receiving pong from a child process
-            measure += (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
+            // measure += (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
         }
+        clock_gettime(CLOCK_MONOTONIC, &end_point);
     }
 
+    // Calculate a total execution time
+    measure = (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
     measure /= iter;
+    
 #ifdef DEBUGMSG
-    printf("[P] measure time: ");
+    printf("[P] (pid: %d) measure time\n", getpid());
 #endif
-    printf("%f ms\n", measure);
+    printf("[Total  ] %f ms\n", measure);
+    printf("[Average] %f ms\n", measure / iter);
 
     return 0;
 }
