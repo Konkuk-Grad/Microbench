@@ -29,8 +29,9 @@ void send_ping(sigset_t *set, sigset_t *old){
     printf("[DEBUG][I] I->O ping_count: %d\n", ++ping_count); // Send ping
 #endif    
     /* Block SIGUSR1 */
-    // sigprocmask(SIG_BLOCK, set, old);
+    
     flag = WORKING;
+    // sigprocmask(SIG_BLOCK, set, old);
     kill(pid2, SIGUSR1);
 }
 
@@ -62,9 +63,6 @@ int main(int argc, char *argv[]){
     sigset_t oldset;
     struct sigaction act;
 
-    sigemptyset(&sigset);
-    sigaddset(&sigset, SIGUSR1);
-
     if(argc != 2){
         printf("[Error] argc must be 2! (Input: %d)\n", argc);
         return -1;
@@ -75,8 +73,12 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
+    /* Set a number of iterations */
     iter = atoi(argv[1]);
 
+    /* Set a sigset blocking SIGUSR1 */
+    sigemptyset(&sigset);
+    sigaddset(&sigset, SIGUSR1);
 
     if(!(pid2 = fork())){ // Child
         pid1 = getppid(); // Parent PID
@@ -85,7 +87,6 @@ int main(int argc, char *argv[]){
         printf("[O] Parent PID: %d, Child PID: %d\n", pid1, pid2);
 #endif
         /* Setting Handler */
-        // signal(SIGUSR1, recv_ping);
         act.sa_handler = recv_ping;
         act.sa_flags = 0;
         sigaction(SIGUSR1, &act, NULL);
@@ -97,9 +98,7 @@ int main(int argc, char *argv[]){
     } else { // Parent
         pid1 = getpid(); // Parent PID
 
-
         /* Setting Handler */
-        // signal(SIGUSR1, recv_pong);
         act.sa_handler = recv_pong;
         act.sa_flags = 0;
         sigaction(SIGUSR1, &act, NULL);
@@ -109,27 +108,14 @@ int main(int argc, char *argv[]){
         printf("[I] Parent PID: %d, Child PID: %d\n", pid1, pid2);
 #endif
         sleep(3); // Wait until setting a child process
+        // pause(); // Wait until getting SIGCONT
         sigprocmask(SIG_BLOCK, &sigset, &oldset);
+
         // Measure a total execution time
         clock_gettime(CLOCK_MONOTONIC, &start_point);
         for(int i = 0; i < iter; i++){
-            // usleep(1000);
             send_ping(&sigset, &oldset); // Send pong to a child process
-            sigpause(SIGUSR1);
-            // sigsuspend(&oldset);
-
-            /* Deadlock */
-            // False /* Signal pending bit is changed, but process is a wait state. */
-            // True  /* kill -> recv_pong handler -> pause */
-            /* Blocked State */ 
-            // if(flag == WORKING){
-            //     pause(); // Wait until receiving pong from a child process
-            // }
-            
-            /* Busy wait */
-            // while(flag);
-
-            // measure += (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
+            sigsuspend(&oldset); // Temporarily unblock SIGUSR1 and wait
         }
         clock_gettime(CLOCK_MONOTONIC, &end_point);
 
@@ -138,13 +124,12 @@ int main(int argc, char *argv[]){
 
     // Calculate a total execution time
     measure = (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
-    // measure /= iter;
 
 #ifdef DEBUGMSG
     printf("[P] (pid: %d) measure time\n", getpid());
 #endif
-    printf("[Total  ] %f ms\n", measure);
-    printf("[Average] %f ms\n", measure / iter);
+    printf("[Total  ] {%f} ms\n", measure);
+    printf("[Average] {%f} ms\n", measure / iter);
 
     return 0;
 }
