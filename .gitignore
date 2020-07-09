@@ -4,3 +4,4 @@ peda-session-*
 .vscode/*
 .vscode-*
 .gdb*
+result*.txt
