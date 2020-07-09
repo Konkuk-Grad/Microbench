@@ -17,34 +17,53 @@ struct timespec start_point, end_point;
 double measure = 0;
 pid_t pid1, pid2;
 
+int ping_count = 0;
+int pong_count = 0;
+
 int flag = NOT_WORKING;
 
-void send_ping(){
+/* Ping Process [I] */
+void send_ping(sigset_t *set, sigset_t *old){
     // clock_gettime(CLOCK_MONOTONIC, &start_point);
-    kill(pid2, SIGUSR1);
-    flag = WORKING;
-}
-
-void recv_ping(){
-    static int ping_count = 0;
 #ifdef PPDEBUG
-    printf("[DEBUG] ping_count: %d\n", ++ping_count);
+    printf("[DEBUG][I] I->O ping_count: %d\n", ++ping_count); // Send ping
 #endif    
-    kill(pid1, SIGUSR1); // SEND PONG
+    /* Block SIGUSR1 */
+    // sigprocmask(SIG_BLOCK, set, old);
+    flag = WORKING;
+    kill(pid2, SIGUSR1);
 }
 
 void recv_pong(){
     // clock_gettime(CLOCK_MONOTONIC, &end_point);
-    static int pong_count = 0;
     flag = NOT_WORKING;
 #ifdef PPDEBUG
-    printf("[DEBUG] pong_count: %d\n", ++pong_count);
+    printf("[DEBUG][I] O->I pong_count: %d\n\n", ++pong_count); // Receive pong
 #endif
 }
 
+/* Pong Process [O] */
+void recv_ping(){
+#ifdef PPDEBUG
+    printf("[DEBUG][O] I->O ping_count: %d\n", ++ping_count); // Receive ping
+    printf("[DEBUG][O] O->I pong_count: %d\n", ++pong_count); // Send pong
+#endif    
+    flag = NOT_WORKING;
+    kill(pid1, SIGUSR1); // SEND PONG
+    flag = WORKING;
+}
+
+
+/* Main function */
 int main(int argc, char *argv[]){
 
     int iter;
+    sigset_t sigset;
+    sigset_t oldset;
+    struct sigaction act;
+
+    sigemptyset(&sigset);
+    sigaddset(&sigset, SIGUSR1);
 
     if(argc != 2){
         printf("[Error] argc must be 2! (Input: %d)\n", argc);
@@ -58,35 +77,57 @@ int main(int argc, char *argv[]){
 
     iter = atoi(argv[1]);
 
+
     if(!(pid2 = fork())){ // Child
         pid1 = getppid(); // Parent PID
         pid2 = getpid(); // Child PID
 #ifdef DEBUGMSG
-        printf("[C] Parent PID: %d, Child PID: %d\n", pid1, pid2);
+        printf("[O] Parent PID: %d, Child PID: %d\n", pid1, pid2);
 #endif
-        signal(SIGUSR1, recv_ping);
+        /* Setting Handler */
+        // signal(SIGUSR1, recv_ping);
+        act.sa_handler = recv_ping;
+        act.sa_flags = 0;
+        sigaction(SIGUSR1, &act, NULL);
+
         while(1){ // Until getting SIGKILL, Infinity loop
             pause();
         }
         exit(0);
     } else { // Parent
         pid1 = getpid(); // Parent PID
-        signal(SIGUSR1, recv_pong);
+
+
+        /* Setting Handler */
+        // signal(SIGUSR1, recv_pong);
+        act.sa_handler = recv_pong;
+        act.sa_flags = 0;
+        sigaction(SIGUSR1, &act, NULL);
+
+
 #ifdef DEBUGMSG
-        printf("[P] Parent PID: %d, Child PID: %d\n", pid1, pid2);
+        printf("[I] Parent PID: %d, Child PID: %d\n", pid1, pid2);
 #endif
         sleep(3); // Wait until setting a child process
+        sigprocmask(SIG_BLOCK, &sigset, &oldset);
         // Measure a total execution time
         clock_gettime(CLOCK_MONOTONIC, &start_point);
         for(int i = 0; i < iter; i++){
-            send_ping(); // Send pong to a child process
+            // usleep(1000);
+            send_ping(&sigset, &oldset); // Send pong to a child process
+            sigpause(SIGUSR1);
+            // sigsuspend(&oldset);
 
             /* Deadlock */
-            /* Signal pending bit is changed, but process is a wait state. */
-            /* Blocked State */
-            // pause(); // Wait until receiving pong from a child process
+            // False /* Signal pending bit is changed, but process is a wait state. */
+            // True  /* kill -> recv_pong handler -> pause */
+            /* Blocked State */ 
+            // if(flag == WORKING){
+            //     pause(); // Wait until receiving pong from a child process
+            // }
+            
             /* Busy wait */
-            while(flag);
+            // while(flag);
 
             // measure += (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
         }
