@@ -20,24 +20,17 @@ pid_t pid1, pid2;
 int ping_count = 0;
 int pong_count = 0;
 
-int flag = NOT_WORKING;
-
 /* Ping Process [I] */
 void send_ping(sigset_t *set, sigset_t *old){
-    // clock_gettime(CLOCK_MONOTONIC, &start_point);
+    // clock_gettime(CLOCK_MONOTONIC, &start_point); // Individual checking time
 #ifdef PPDEBUG
     printf("[DEBUG][I] I->O ping_count: %d\n", ++ping_count); // Send ping
 #endif    
-    /* Block SIGUSR1 */
-    
-    flag = WORKING;
-    // sigprocmask(SIG_BLOCK, set, old);
     kill(pid2, SIGUSR1);
 }
 
 void recv_pong(){
-    // clock_gettime(CLOCK_MONOTONIC, &end_point);
-    flag = NOT_WORKING;
+    // clock_gettime(CLOCK_MONOTONIC, &end_point); // Individual checking time
 #ifdef PPDEBUG
     printf("[DEBUG][I] O->I pong_count: %d\n\n", ++pong_count); // Receive pong
 #endif
@@ -49,9 +42,7 @@ void recv_ping(){
     printf("[DEBUG][O] I->O ping_count: %d\n", ++ping_count); // Receive ping
     printf("[DEBUG][O] O->I pong_count: %d\n", ++pong_count); // Send pong
 #endif    
-    flag = NOT_WORKING;
     kill(pid1, SIGUSR1); // SEND PONG
-    flag = WORKING;
 }
 
 
