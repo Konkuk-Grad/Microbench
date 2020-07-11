@@ -7,8 +7,6 @@
 #include <sys/types.h>
 #include <time.h>
 
-#define BUF_SIZE 1
-
 #define NOT_WORKING 0
 #define WORKING 1
 
@@ -49,9 +47,9 @@ void recv_ping(){
 /* Main function */
 int main(int argc, char *argv[]){
 
-    int iter;
-    sigset_t sigset;
-    sigset_t oldset;
+    int iter; // Number of iterations
+    sigset_t sigset; // Block SIGUSR1
+    sigset_t oldset; // Prev sigset
     struct sigaction act;
 
     if(argc != 2){
@@ -98,7 +96,7 @@ int main(int argc, char *argv[]){
 #ifdef DEBUGMSG
         printf("[I] Parent PID: %d, Child PID: %d\n", pid1, pid2);
 #endif
-        sleep(3); // Wait until setting a child process
+        sleep(3); // Wait until setting a child process => Will be deprecated
         // pause(); // Wait until getting SIGCONT
         sigprocmask(SIG_BLOCK, &sigset, &oldset);
 
