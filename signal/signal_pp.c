@@ -2,9 +2,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include <pthread.h>
-#include <sys/time.h>
-#include <sys/types.h>
 #include <time.h>
 
 #define NOT_WORKING 0
