@@ -9,6 +9,8 @@ process_list = []
 def exec_program(iter = 10):
     p = process([exec_file_name] + [str(iter)])
     process_list.append(p)
+    p.recvuntil("{")
+    return int(p.recvuntil(",")[:-1])
 
 if __name__ == "__main__":
     # INPUT FROM USER
@@ -21,10 +23,14 @@ if __name__ == "__main__":
         print("[Error] sys.argv[1] or sys.argv[2] is not a positive integer. (Input: {0}, {1})".format(sys.argv[1], sys.argv[2]))
     
     context.log_level = 'error'
+    pid_list = []
     for i in range(pcnt):
         # [Iteration count, Message Queue]
-        exec_program(noi)
+        pid_list.append(exec_program(noi))
 
+    for pid in pid_list:
+        os.kill(pid, signal.SIGCONT)
+    
     # WAIT UNTIL BEING RESULTED
     recv = []
     for i in range(pcnt):
