@@ -4,8 +4,6 @@
 #include <signal.h>
 #include <time.h>
 
-#define NOT_WORKING 0
-#define WORKING 1
 
 /* Global Variables */
 struct timespec start_point, end_point;
@@ -20,44 +18,60 @@ int iter = 0;
 
 /* Functions */
 /* Ping Process [I] */
-void start_ping(){
-    // Measure a total execution time
-#ifdef PPDEBUG
-    printf("[DEBUG][START][I] I->O ping_count: %d\n", ++ping_count); // Send ping
-#endif
-    ping_count++;
-    clock_gettime(CLOCK_MONOTONIC, &start_point);
-    kill(pid2, SIGUSR1);
-}
-
 void recv_pong(){
     // clock_gettime(CLOCK_MONOTONIC, &end_point); // Individual checking time
-#ifdef PPDEBUG
-    printf("[DEBUG][I] O->I pong_count: %d\n\n", ++pong_count); // Receive pong
-    printf("[DEBUG][I] I->O ping_count: %d\n", ++ping_count); // Send ping
+    
+    if(ping_count++ < iter){
+#ifdef DEBUGMSG
+        printf("[DEBUG][I] I->O ping_count: %d\n", ping_count); // Send ping
 #endif
-    ping_count++;
-    kill(pid2, SIGUSR1);        
+        kill(pid2, SIGUSR1);        
+    } else {
+        clock_gettime(CLOCK_MONOTONIC, &end_point);
+        printf("[DEBUG][Terminate][I] I->O ping_count: %d\n", ping_count); // Send ping
+        ping_count--;
+        kill(pid2, SIGUSR2); // Terminate pong process
+    }
+}
+
+// Terminate Ping Process
+void end_ping(){
+    measure = (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
+
+    printf("[Total  ] {%f} ms\n", measure);
+    printf("[Average] {%f} ms\n", measure / iter);
+
+    exit(0);
 }
 
 /* Pong Process [O] */
 void recv_ping(){
-#ifdef PPDEBUG
-    printf("[DEBUG][O] I->O ping_count: %d\n", ++ping_count); // Receive ping
-    printf("[DEBUG][O] O->I pong_count: %d\n", ++pong_count); // Send pong
-#endif  
-    pong_count++;
-    kill(pid1, SIGUSR1); // SEND PONG
+    if(pong_count++ < iter){
+        kill(pid1, SIGUSR1); // SEND PONG
+#ifdef DEBUGMSG
+        printf("[DEBUG][O] O->I pong_count: %d\n", pong_count); // Send pong
+#endif
+    } else {
+        // dummy else
+    }
+}
+
+// Terminate Pong Process
+void end_pong(){
+#ifdef DEBUGMSG
+    printf("[DEBUG][endpong][O] pong_count: %d\n", pong_count);
+#endif
+    kill(pid1, SIGUSR2);
+    exit(0);
 }
 
 
 /* Main function */
 int main(int argc, char *argv[]){
 
-    int local_iter = 0; // Number of iterations
     sigset_t sigset; // Block SIGUSR1
     sigset_t oldset; // Prev sigset
-    struct sigaction act[2]; // 0: SIGCONT / 1: SIGUSR1
+    struct sigaction act[2]; // 0: SIGUSR1 / 1: SIGUSR2
 
     if(argc != 2){
         printf("[Error] argc must be 2! (Input: %d)\n", argc);
@@ -71,69 +85,54 @@ int main(int argc, char *argv[]){
 
     /* Set a number of iterations */
     iter = atoi(argv[1]);
-    local_iter = iter;
 
     /* Set a sigset blocking SIGUSR1 */
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGUSR1);
+    sigaddset(&sigset, SIGUSR2);
 
     if(!(pid2 = fork())){ // Child
         pid1 = getppid(); // Parent PID
         pid2 = getpid(); // Child PID
-#ifdef DEBUGMSG
-        printf("[O] Parent PID: %d, Child PID: %d\n", pid1, pid2);
-#endif
-        /* Setting Handler */
-        act[1].sa_handler = recv_ping;
-        act[1].sa_flags = 0;
-
-        sigaction(SIGUSR1, &act[1], NULL);
-
-        sigprocmask(SIG_BLOCK, &sigset, &oldset); // Block SIGUSR1
-        while(local_iter--){ // Until getting SIGKILL, Infinity loop
-            sigsuspend(&oldset); // Temporarily unblock SIGUSR1 and wait
-            // pause();
-        }
-        printf("[O] pong_count: %d\n", pong_count);
-        exit(0);
-    } else { // Parent
-        pid1 = getpid(); // Parent PID
 
         /* Setting Handler */
-        act[0].sa_handler = start_ping;
+        act[0].sa_handler = recv_ping;
         act[0].sa_flags = 0;
 
-        act[1].sa_handler = recv_pong;
+        act[1].sa_handler = end_pong;
+        act[1].sa_flags = 0;
+
+        sigaction(SIGUSR1, &act[0], NULL);
+        sigaction(SIGUSR2, &act[1], NULL);
+
+        sigprocmask(SIG_BLOCK, &sigset, &oldset); // Block SIGUSR1
+        while(1){ // Until getting SIGKILL, Infinity loop
+            sigsuspend(&oldset); // Temporarily unblock SIGUSR1 and wait
+        }
+    } else { // Parent
+        pid1 = getpid(); // Parent PID
+        printf("{%d,%d}\n", pid1, pid2); // Parsing PIDs {Ping, Pong}
+
+        /* Setting Handler */
+        act[0].sa_handler = recv_pong;
+        act[0].sa_flags = 0;
+
+        act[1].sa_handler = end_ping;
         act[1].sa_flags = 0;
         
-        sigaction(SIGCONT, &act[0], NULL);
-        sigaction(SIGUSR1, &act[1], NULL);
+        sigaction(SIGUSR1, &act[0], NULL); // Received Signal
+        sigaction(SIGUSR2, &act[1], NULL); // End Signal
 
-        printf("{%d,%d}\n", pid1, pid2);
-#ifdef DEBUGMSG
-        printf("[I] Parent PID: %d, Child PID: %d\n", pid1, pid2);
-#endif
-        sigprocmask(SIG_BLOCK, &sigset, &oldset); // Block SIGUSR1
-        pause(); // Wait until getting SIGCONT
-        
-        while(local_iter--){
+        sigprocmask(SIG_BLOCK, &sigset, &oldset); // Block SIGUSR1, SIGUSR2
+
+        // pause(); // Wait until getting SIGCONT
+        kill(getpid(), SIGSTOP);
+        clock_gettime(CLOCK_MONOTONIC, &start_point);
+        recv_pong();
+        while(1){
             sigsuspend(&oldset); // Temporarily unblock SIGUSR1 and wait
-            // pause();
         }
-        clock_gettime(CLOCK_MONOTONIC, &end_point);
-        ping_count--;
-        kill(SIGKILL, pid2);
     }
-
-    printf("[I] ping_count: %d\n", ping_count);
-    // Calculate a total execution time
-    measure = (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
-
-#ifdef DEBUGMSG
-    printf("[P] (pid: %d) measure time\n", getpid());
-#endif
-    printf("[Total  ] {%f} ms\n", measure);
-    printf("[Average] {%f} ms\n", measure / iter);
 
     return 0;
 }
