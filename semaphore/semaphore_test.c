@@ -5,11 +5,12 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <time.h>
+#include <semaphore.h>
+#include <ctype.h>
 
 #define MAX 1
 
-typedef int semaphore;
-static semaphore Empty, Full, Mutex;
+static sem_t Empty, Full, Mutex;
 int buffer[MAX], front= 0, rear =0, cnt=0;
 int N = 1000;
 struct timespec begin, end;
@@ -33,7 +34,7 @@ int consume_item() {
 	printf("C get %d\n", item);
 	return item;
 }
-
+/*
 int setSemaphore(int semID, int semOP) {
 	struct sembuf buf;
 
@@ -52,6 +53,7 @@ void wait(semaphore s) {
 void signal(semaphore s) {
 	setSemaphore(s, 1);
 }
+*/
 
 void* producer(void* arg) {
 	int item;
@@ -61,11 +63,11 @@ void* producer(void* arg) {
 		if(cnt<N){
 			printf("cnt------>%d\n",cnt);
 			item = produce_item();
-			wait(Empty); 
-			wait(Mutex);
+			sem_wait(&Empty); 
+			sem_wait(&Mutex);
 			put_item(item);
-			signal(Mutex);
-			signal(Full);
+			sem_post(&Mutex);
+			sem_post(&Full);
 		}else{
 			printf("P is over\n");
 			break;
@@ -81,13 +83,12 @@ void* consumer(void* arg) {
 	int item;
 	while (1) {
 		if(cnt<N){
-			wait(Full);
-			wait(Mutex);
+			sem_wait(&Full);
+			sem_wait(&Mutex);
 			item = consume_item();
-			signal(Mutex);
-			signal(Empty);
+			sem_post(&Mutex);
+			sem_post(&Empty);
 			cnt++;
-
 		}
 		else{
 			printf("C is over\n");
@@ -102,13 +103,19 @@ int main(int argc, char *argv[]) {
 	pthread_t thread2;
 	double time;
 	const long long NANOS = 1000000000LL;
-	union semun {
+	/*union semun {
 		int	val;
 		struct semid_ds* buf;
 		unsigned short int* array;
 	}arg;
-
+	*/
 	N = atoi(argv[1]);
+	if(isdigit(N)!=0){
+		printf("Error!\n");
+		return 0;
+	}
+		
+	/*
 	if ((Empty = semget(IPC_PRIVATE, 1, IPC_CREAT | 0666)) == -1) {
 		printf("semget_Empty Error\n");
 		return -1;
@@ -136,12 +143,30 @@ int main(int argc, char *argv[]) {
 		printf("semctl_Full Error\n");
 		return -1;
 	}
+	*/
+
+	if((sem_init(&Empty,0,MAX))!=0)
+	{
+		printf("sem_init_Empty Error\n");
+		return -1;
+	}
+	if((sem_init(&Mutex,0,1))!=0)
+	{
+		printf("sem_init_Mutex Error\n");
+		return -1;
+	}
+	if((sem_init(&Full,0,0))!=0)
+	{
+		printf("sem_init_Full Error\n");
+		return -1;
+	}
 
 	pthread_create(&thread1, NULL, consumer, NULL);
 	pthread_create(&thread2, NULL, producer, NULL);
 	pthread_join(thread1, NULL);
 	pthread_join(thread2, NULL);
 
+/*
 	if(semctl(Empty,0,IPC_RMID,arg)){
 		printf("semctl_Empty_RM Error\n");
 		return -1;
@@ -154,6 +179,11 @@ int main(int argc, char *argv[]) {
 		printf("semctl_Full_RM Error\n");
 		return -1;
 	}
+	*/
+
+	//sem_destroy(&Empty);
+	//sem_destroy(&Full);
+	//sem_destroy(&Mutex);
 	time = (end.tv_sec-begin.tv_sec) * 1000 + (double)(end.tv_nsec-begin.tv_nsec) / 1000000;
 	// time = (double)time/1000000;
 
