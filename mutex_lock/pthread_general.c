@@ -17,7 +17,7 @@ pthread_cond_t cond;
 void increase_counter(int thread_id){
     pthread_mutex_lock(&lock);
     g_counter+=1;
-    // fprintf(stderr,"[thread_%2d]g_counter : %d ** \n", thread_id, g_counter);
+    // fprintf(stdout,"[thread_%2d]g_counter : %d ** \n", thread_id, g_counter);
     pthread_mutex_unlock(&lock);
 }
 
@@ -39,7 +39,8 @@ void* thread_act(void* arg){
         increase_counter(thread_id);
     }
     clock_gettime(CLOCK_MONOTONIC, &end_point[thread_id]);
-    // fprintf(stderr, "debg[%d] : %lf %lf\n",thread_id,(double)start_point[thread_id].tv_sec, (double)start_point[thread_id].tv_nsec);
+    fprintf(stdout, "debg[%d] : %ld %ld\n",thread_id, end_point[thread_id].tv_sec - start_point[thread_id].tv_sec, end_point[thread_id].tv_nsec - start_point[thread_id].tv_nsec);
+    pthread_exit((void*)0);
 }
 
 int main(int argc,char* argv[]){
@@ -80,7 +81,7 @@ int main(int argc,char* argv[]){
     for(int i = 0; i < thread_num; i++){
         pthread_join(p_thread[i],(void**)&status);
         measure = ((end_point[i].tv_sec - start_point[i].tv_sec) * 1000 + (double)(end_point[i].tv_nsec - start_point[i].tv_nsec) / 1000000);
-        fprintf(stderr,"Thread %3d is Ended with %10lf status : %d\n", i,measure,status);
+        fprintf(stdout,"Thread %3d is Ended with %10lf status : %d\n", i,measure,status);
     }
     if(g_counter != try_count * thread_num){
         printf("g_counter race conditon");
