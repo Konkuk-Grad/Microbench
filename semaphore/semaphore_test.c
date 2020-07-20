@@ -12,7 +12,7 @@
 
 static sem_t Empty, Full, Mutex;
 int buffer[MAX], front= 0, rear =0, cnt=0;
-int N = 1000;
+int N;
 struct timespec begin, end;
 
 int produce_item() {
@@ -39,21 +39,16 @@ void* producer(void* arg) {
 	int item;
 	clock_gettime(CLOCK_MONOTONIC,&begin);
 	printf("begin time : %ldns\n",begin.tv_nsec);
-	while (1) {
-		if(cnt<N){
-			printf("cnt------>%d\n",cnt);
-			item = produce_item();
-			sem_wait(&Empty); 
-			sem_wait(&Mutex);
-			put_item(item);
-			sem_post(&Mutex);
-			sem_post(&Full);
-		}else{
-			printf("P is over\n");
-			break;
-		}
-
+	while (cnt<N) {
+		printf("cnt------>%d\n",cnt);
+		item = produce_item();
+		sem_wait(&Empty); 
+		sem_wait(&Mutex);
+		put_item(item);
+		sem_post(&Mutex);
+		sem_post(&Full);
 	}
+	printf("P is over\n");
 	clock_gettime(CLOCK_MONOTONIC,&end);
 	printf("end time : %ldns\n",end.tv_nsec);
 	return 0;
@@ -61,20 +56,15 @@ void* producer(void* arg) {
 
 void* consumer(void* arg) {
 	int item;
-	while (1) {
-		if(cnt<N){
-			sem_wait(&Full);
-			sem_wait(&Mutex);
-			item = consume_item();
-			sem_post(&Mutex);
-			sem_post(&Empty);
-			cnt++;
-		}
-		else{
-			printf("C is over\n");
-			break;
-		}
+	while(cnt<N) {
+		sem_wait(&Full);
+		sem_wait(&Mutex);
+		item = consume_item();
+		sem_post(&Mutex);
+		sem_post(&Empty);
+		cnt++;
 	}
+	printf("C is over\n");
 	return 0;
 }
 
@@ -84,8 +74,8 @@ int main(int argc, char *argv[]) {
 	double time;
 
 	N = atoi(argv[1]);
-	if(isdigit(N)!=0){
-		printf("Input NUM Error!\n");
+	if(isdigit(N)){
+		printf("Input NUM Error! %d\n",N);
 		return -1;
 	}
 
