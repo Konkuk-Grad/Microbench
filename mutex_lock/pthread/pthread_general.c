@@ -8,6 +8,16 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 
+#ifdef ftrace
+    #include <stdarg.h>
+    #include <string.h>
+    #include <fcntl.h>
+    #define _STR(x) #x
+    #define STR(x) _STR(x)
+    #define MAX_PATH 256
+    int trace_fd = -1;
+#endif
+
 struct timespec *start_point, *end_point;
 struct timespec *arrive_point, *run_point;
 double * response_time;
@@ -17,19 +27,83 @@ unsigned int thread_num;
 unsigned int ready_flag = 0;
 long ncores;
 
-
 pthread_mutex_t lock;
 pthread_mutex_t condition_lock;
-
 pthread_cond_t cond;
 
+#ifdef ftrace
+const char *find_tracefs(void)
+{
+       static char tracefs[MAX_PATH+1];
+       static int tracefs_found;
+       char type[100];
+       FILE *fp;
+
+       if (tracefs_found)
+               return tracefs;
+
+       if ((fp = fopen("/proc/mounts","r")) == NULL) {
+               perror("/proc/mounts");
+               return NULL;
+       }
+
+       while (fscanf(fp, "%*s %"
+                     STR(MAX_PATH)
+                     "s %99s %*s %*d %*d\n",
+                     tracefs, type) == 2) {
+               if (strcmp(type, "tracefs") == 0)
+                       break;
+       }
+       fclose(fp);
+
+       if (strcmp(type, "tracefs") != 0) {
+               fprintf(stderr, "tracefs not mounted");
+               return NULL;
+       }
+
+       tracefs_found = 1;
+
+       return tracefs;
+}
+
+const char *tracing_file(const char *file_name)
+{
+       static char trace_file[MAX_PATH+1];
+       snprintf(trace_file, MAX_PATH, "%s/%s", find_tracefs(), file_name);
+       return trace_file;
+}
+
+void trace_write(const char* fmt, ...){
+    va_list ap;
+    char buf[256];
+    int n;
+
+    if(trace_fd < 0){
+        // fprintf(stderr, "failed : %d \n", trace_fd);
+        return;
+    } 
+    va_start(ap, fmt);
+    n = vsnprintf(buf, 256, fmt, ap);
+    va_end(ap);
+
+    write(trace_fd, buf, n);
+}
+#endif
+
+
 void increase_counter(int thread_id){
+#ifdef ftrace
+    trace_write("mutex start");
+#endif
     pthread_mutex_lock(&lock);
     clock_gettime(CLOCK_MONOTONIC, &run_point[thread_id]);
     response_time[thread_id] += ((run_point[thread_id].tv_sec - arrive_point[thread_id].tv_sec) * 1000 + (double)(run_point[thread_id].tv_nsec - arrive_point[thread_id].tv_nsec) / 1000000);
     g_counter+=1;
     // fprintf(stdout,"[thread_%2d]g_counter : %d ** \n", thread_id, g_counter);
     pthread_mutex_unlock(&lock);
+#ifdef ftrace
+    trace_write("mutex done");
+#endif 
 }
 
 void* thread_act(void* arg){
@@ -80,6 +154,17 @@ int main(int argc,char* argv[]){
     pid_t tid;
     cpu_set_t mask;
     struct sched_param param;
+
+
+#ifdef ftrace
+    fprintf(stderr,"trace_marker :  %s\n",tracing_file("trace_marker"));
+    trace_fd = open(tracing_file("trace_marker"), O_WRONLY);
+    if(trace_fd < 0){
+        fprintf(stderr, "trace_fd : failed");
+    }else {
+        fprintf(stderr, "trace_fd : sucess %d\n", trace_fd);
+    }
+#endif
 #ifdef core
     ncores = sysconf(_SC_NPROCESSORS_ONLN)-1;
     CPU_ZERO(&mask);

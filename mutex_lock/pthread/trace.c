@@ -58,8 +58,6 @@ int main (int argc, char **argv)
             fprintf(stderr, "[argc] : error");
             exit(-1);
         }
-        
-                fprintf(stderr, "%s\n %s",tracing_file("current_tracer"), tracing_file("set_ftrace_pid"));
         if (fork() > 0) {
                 int fd, ffd;
                 char line[64];
@@ -79,7 +77,7 @@ int main (int argc, char **argv)
                 close(fd);
                 close(ffd);
 
-                execvp(argv[1], argv+1);
+                execv(argv[1], argv+1);
         }
 
         return 0;
