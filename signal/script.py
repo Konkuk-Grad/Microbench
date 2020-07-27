@@ -100,26 +100,58 @@ def sig_test_setattr():
     4: Graph type
     5: Number of gap
     '''
-    attr = [0 for i in range(6)]
+    flag = 0
+    num_of_attr = 6
+    attr = []
+    attr_name = {
+                    0: "Number of processes", 1: "Number of iterations",
+                    2: "Number of cores", 3: "Number of tests",
+                    4: "Graph type", 5: "Number of gap"
+                }
+    while flag == 0:
+        attr = [0 for i in range(num_of_attr)]
 
-    while len(list(filter(lambda x: x <= 0, attr))):
-        if attr[0] <= 0:
-            attr[0] = int(input("Number of processes' pairs: "))
-        if attr[1] <= 0:
-            attr[1] = int(input("Number of iterations: "))
-        if attr[2] <= 0:
-            attr[2] = int(input("Number of cores (Max cores: {0}): ".format(max_cores)))
-            attr[2] = -1 if attr[2] > max_cores else attr[2]
-        if attr[3] <= 0:
-            attr[3] = int(input("Number of tests: "))
-        if attr[4] <= 0:
-            attr[4] = int(input("Variations of graphs: "))
-        if attr[4] == 2 and attr[5] <= 0:
-            attr[5] = int(input("Gaps: "))
+        while len(list(filter(lambda x: x <= 0, attr))):
+            if attr[0] <= 0:
+                attr[0] = int(input("Number of processes' pairs: "))
+            if attr[1] <= 0:
+                attr[1] = int(input("Number of iterations: "))
+            if attr[2] <= 0:
+                attr[2] = int(input("Number of cores (Max cores: {0}): ".format(max_cores)))
+                attr[2] = -1 if attr[2] > max_cores else attr[2]
+            if attr[3] <= 0:
+                attr[3] = int(input("Number of tests: "))
+            if attr[4] <= 0:
+                attr[4] = int(input("Variations of graphs: "))
+            if attr[4] == 2 and attr[5] <= 0:
+                attr[5] = int(input("Gaps: "))
 
-    if attr[4] != 2:
-        attr[5] = 1
-    
+        if attr[4] != 2:
+            attr[5] = 1
+
+        print("\n* Test Attribute\n")
+        for i in range(num_of_attr):
+            print("{0}. {1}: {2}".format(i, attr_name[i], attr[i]))
+        print()
+
+        flag = 1
+        # while flag == 0:
+        #     flag = input("Confirm? (Y/N): ")
+        #     print (flag, type(flag))
+        #     if flag == "Y":
+        #         print ("hello")
+        #         flag = 1
+        #         break
+        #     elif flag == "N":
+        #         print("wtf")
+        #         flag = 0
+        #         break
+        #     else:
+        #         print("???????")
+        #         flag = 0
+
+
+
     return attr
 
     
@@ -158,7 +190,7 @@ def sig_test_all_run(attr):
     
     # Increase number of processes' pairs from 1 
     plog = log.progress("Testing ", level = logging.CRITICAL)
-    context.log_level = 'ERROR'
+    # context.log_level = 'ERROR'
     
     for i in range(1, attr[0] + 1, attr[5]): # attr[0]: Number of processes', attr[5] = gap
         # Number of tests
@@ -178,7 +210,7 @@ def sig_test_all_run(attr):
             except:
                 result[i] = single_result
 
-    context.log_level = 'INFO'
+    # context.log_level = 'INFO'
     
     plog.success("Hello world!")
         
