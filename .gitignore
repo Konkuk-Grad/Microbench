@@ -6,3 +6,5 @@ peda-session-*
 .gdb*
 result*.txt
 */.vscode/*
+*.csv
+*.dat
