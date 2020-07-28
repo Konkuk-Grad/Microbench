@@ -116,22 +116,12 @@ void* thread_act(void* arg){
         exit(1);
 
 #endif
-#ifdef ftrace
-    // struct timespec t;
-    // t.tv_sec = 0;
-    // t.tv_nsec = 1000;
-    // trace_write("before nano");
-    // write(trace_fd, "before nano\n", 12);
-    // nanosleep(&t, NULL);
-    // write(trace_fd, "after nano\n", 11);
-    // trace_write("after nano");
     int s;
     char line[64];
     s = sprintf(line, "%d\n", tid);
     write(trace_pid, line, s); 
    
     trace_write("dbg start");
-#endif
 
     pthread_mutex_lock(&condition_lock);
     ready_flag+=1;
