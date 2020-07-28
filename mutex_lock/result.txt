@@ -1,4 +1,0 @@
-debg[1] : 0 34193790
-debg[0] : 0 34312844
-Thread   0 is Ended with  34.312844 status : 0
-Thread   1 is Ended with  34.193790 status : 0
