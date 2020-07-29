@@ -12,7 +12,7 @@
 #include <time.h>
 
 /***** Signal Headers *****/
-#include "mbt_signal.h"
+#include "mbt_signal/mbt_signal.h"
 
 /***** IPC Headers *****/
 // #include "mbt_signal.h"
