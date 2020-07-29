@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
 
     switch(topology){
         case 1: // Ping-pong
-            init_pingpong(pairs, iter, cores);
+            sig_test(topology, pairs, iter, cores);
             break;
         default:
             break;
