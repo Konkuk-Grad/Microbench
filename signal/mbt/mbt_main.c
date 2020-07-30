@@ -28,13 +28,16 @@ int main(int argc, char *argv[]){
     iter = atoi(argv[3]);
     cores = atoi(argv[4]);
 
+    double measure_time = 0;
     switch(topology){
         case 1: // Ping-pong
-            sig_test(topology, pairs, iter, cores);
+            measure_time = sig_test(topology, pairs, iter, cores);
             break;
         default:
             break;
     }
 
+    printf("measure_time: %f\n", measure_time);
+    
     return 0;
 }
