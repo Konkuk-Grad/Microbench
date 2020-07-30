@@ -1,4 +1,4 @@
-#include "../mbt_headers/mbt_signal.h"
+#include "mbt_signal.h"
 
 double sig_test(int topology, int processes, int iter, int num_cpus){
     pid_t* trig_pid = NULL;
@@ -20,6 +20,11 @@ double sig_test(int topology, int processes, int iter, int num_cpus){
 
 }
 // int sig_test_attr(); // Signal Test Setting Attribute
+
+
+/* Topology에 해당하는 함수를 실행, 해당 함수는 process 들을
+ *사용자의 매개변수에 따라 실행해놓고 process들을 정지시켜놓아야 함. 
+ */
 pid_t* sig_test_init(int topology, int processes, int iter, int num_cpus){ // Signal Test Initialization
     switch(topology){
         case 1: // Ping-pong

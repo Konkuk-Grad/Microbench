@@ -1,5 +1,5 @@
 /***** Parent Header *****/
-#include "mbt.h"
+#include "../mbt.h"
 
 // Start mbt_signal.h
 #ifndef __MBT_SIG_H__

@@ -1,4 +1,4 @@
-#include "../mbt_headers/mbt_sig_pp.h"
+#include "mbt_sig_pp.h"
 
 /* 1) Ping Process */
 void recv_pong(){

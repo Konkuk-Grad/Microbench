@@ -19,18 +19,18 @@
 /* ------- */
 
 /* 1. Signal Header */
-#include "mbt_signal.h"
+#include "mbt_signal/mbt_signal.h"
 
 /* 2. IPC Header */
-// #include "mbt_ipc.h"
+// #include "mbt_ipc/mbt_ipc.h"
 
 /* 3. Semaphore Header */
-// #include "mbt_sem.h"
+// #include "mbt_sem/mbt_sem.h"
 
 /* 4. Mutex Header */
-// #include "mbt_mutex.h"
+// #include "mbt_mutex/mbt_mutex.h"
 
 /* 5. TCP/IP Header */
-// #include "mbt_network.h"
+// #include "mbt_network/mbt_network.h"
 
 #endif
