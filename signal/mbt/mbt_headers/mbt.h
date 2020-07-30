@@ -4,7 +4,14 @@
 #define _GNU_SOURCE
 
 /***** Parent Header *****/
-#include "mbt_req.h"
+#ifndef __GENERAL_H__
+#define __GENERAL_H__
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#endif
 
 // Start mbt.h
 #ifndef __MBT_H__
