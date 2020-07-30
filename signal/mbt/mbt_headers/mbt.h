@@ -1,9 +1,6 @@
-/* ------- */
-/* Defines */
-/* ------- */
 #define _GNU_SOURCE
 
-/***** Parent Header *****/
+/***** Parent Headers *****/
 #ifndef __GENERAL_H__
 #define __GENERAL_H__
 
@@ -16,22 +13,24 @@
 // Start mbt.h
 #ifndef __MBT_H__
 #define __MBT_H__
-/* -----------------*/
-/* Required Headers */
-/* -----------------*/
 
+/* ------- */
+/* Headers */
+/* ------- */
 
-
-/***** Signal Headers *****/
+/* 1. Signal Header */
 #include "mbt_signal.h"
 
-/***** IPC Headers *****/
-// #include "mbt_signal.h"
+/* 2. IPC Header */
+// #include "mbt_ipc.h"
 
-/***** Semaphore Headers *****/
-// #include "mbt_signal.h"
+/* 3. Semaphore Header */
+// #include "mbt_sem.h"
 
-/***** Mutex Headers *****/
-// #include "mbt_signal.h"
+/* 4. Mutex Header */
+// #include "mbt_mutex.h"
+
+/* 5. TCP/IP Header */
+// #include "mbt_network.h"
 
 #endif
