@@ -20,9 +20,6 @@ pid_t ping_pid, pong_pid;
 /* --------- */
 /* Functions */
 /* --------- */
-int sub(int a, int b);
-int test2(int a, int b);
-
 /* 0. Main process */
 pid_t* init_pingpong(int pairs, int iter, int num_cpus);
 

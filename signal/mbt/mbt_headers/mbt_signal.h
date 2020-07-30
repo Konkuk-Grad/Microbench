@@ -16,7 +16,7 @@
 /* ---------- */
 typedef struct __time_msg{
     long mtype;
-    long measure_time;
+    double measure_time;
 }time_msg;
 
 /* ---------------- */
@@ -33,10 +33,7 @@ int user_iter_count;
 /* --------- */
 /* Functions */
 /* --------- */
-int add(int a, int b);
-int multi(int a, int b);
-
-int sig_test(int topology, int processes, int iter, int num_cpus);
+double sig_test(int topology, int processes, int iter, int num_cpus);
 pid_t* sig_test_init(int topology, int processes, int iter, int num_cpus);
 double sig_test_exec(pid_t *trig_pid, int processes, int topology);
 

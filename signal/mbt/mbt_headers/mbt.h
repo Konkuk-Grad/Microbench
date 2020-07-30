@@ -2,14 +2,17 @@
 /* Defines */
 /* ------- */
 #define _GNU_SOURCE
-#define NAME "12"
 
+/***** Parent Header *****/
+#include "mbt_req.h"
+
+// Start mbt.h
 #ifndef __MBT_H__
 #define __MBT_H__
 /* -----------------*/
 /* Required Headers */
 /* -----------------*/
-#include "mbt_req.h"
+
 
 
 /***** Signal Headers *****/

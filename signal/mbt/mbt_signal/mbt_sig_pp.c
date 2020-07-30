@@ -1,17 +1,5 @@
 #include "../mbt_headers/mbt_sig_pp.h"
 
-int sub(int a, int b){
-    time_msg t;
-    // test = a - b;
-    printf("hello world\n");
-    return 1;
-}
-
-int test2(int a, int b){
-    sum = add(a, b);
-    return sum;
-}
-
 /* 1) Ping Process */
 void recv_pong(){
     // clock_gettime(CLOCK_MONOTONIC, &end_point); // Individual checking time
@@ -31,10 +19,6 @@ void recv_pong(){
 }
 
 void end_ping(){
-    struct mq_attr attr;
-    attr.mq_flags = 0;
-    attr.mq_maxmsg = 1;
-    attr.mq_msgsize = sizeof(time_msg);
     time_msg msgbox;
 
     int mfd = -1, tmp = -1;
@@ -48,6 +32,7 @@ void end_ping(){
         exit(-1);
     } else {
         if(msgbox.measure_time == -complete_processes){
+            // Test ends then call parent
             kill(getppid(), SIGCONT);
         } else {
             msgbox.measure_time--;
@@ -68,8 +53,10 @@ void end_ping(){
         }
     }
 
-    // printf("[Total  ] {%f} ms\n", measure_time);
-    // printf("[Average] {%f} ms/iter \n", measure_time / user_iter_count);
+#ifdef DEBUGMSG
+    printf("[Total  ] {%f} ms\n", measure_time);
+    printf("[Average] {%f} ms/iter \n", measure_time / user_iter_count);
+#endif
 
     exit(0);
 }
@@ -128,7 +115,7 @@ pid_t* init_pingpong(int pairs, int iter, int num_cpus){
     
     for(int i = 0; i < pairs; i++){
         if(!(pid_arr[i] = fork())){ // Child (Ping)
-            if(pong_pid = fork()){ // Parent (Pong)
+            if(pong_pid = fork()){ // Parent (Ping)
 
                 /* Setting Handler */            
                 act[0].sa_handler = recv_pong;
@@ -155,7 +142,7 @@ pid_t* init_pingpong(int pairs, int iter, int num_cpus){
                 while(1){
                     sigsuspend(&oldset);
                 }
-            } else { // Child (Ping)
+            } else { // Child (Pong)
                 ping_pid = getppid();
 
                 /* Setting Handler */
@@ -181,10 +168,14 @@ pid_t* init_pingpong(int pairs, int iter, int num_cpus){
                 }
             }
         } else {
+#ifdef DEBUGMSG
             printf("pid: %d, fork: %d\n", getpid(), i);
+#endif
         }
     }
 
+#ifdef DEBUGMSG
     printf("hello world! %d\n", getpid());
+#endif
     return pid_arr;
 }
