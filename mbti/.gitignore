@@ -3,5 +3,11 @@
 peda-session-*
 .vscode/*
 .vscode-*
+.vscode
 .gdb*
 result*.txt
+*/.vscode/*
+*.csv
+*.dat
+CMake*
+build/
