@@ -76,9 +76,9 @@ int main(int argc, char *argv[]){
     struct sigaction act[2]; // 0: SIGUSR1 / 1: SIGUSR2
     cpu_set_t mask;
     
-int result = sched_setaffinity(0, sizeof(mask), &mask);
+// int result = sched_setaffinity(0, sizeof(mask), &mask);
 
-    if(argc != 2){
+    if(argc != 4){
         printf("[Error] argc must be 2! (Input: %d)\n", argc);
         return -1;
     }
