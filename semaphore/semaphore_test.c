@@ -9,7 +9,7 @@
 #include <ctype.h>
 
 #define MAX 1
-
+//버퍼사이즈
 static sem_t Empty, Full, Mutex;
 int buffer[MAX], front= 0, rear =0, cnt=0;
 int N;
