@@ -1,17 +1,10 @@
 #include "mbti_sem.h"
 
-int sem_produce_item()//생산자프로세스에서 사용될 아이템을 만든다.
+int sem_put_item()//공유 버퍼에 생상한 아이템을 넣는다.
 {
     int item = rand()%50;
-	printf("P made %d\n", item);
-	return item;
-}
-
-int sem_put_item(int item)//공유 버퍼에 생상한 아이템을 넣는다.
-{
     sem_rear = (sem_rear + 1) % 1;
 	sem_buffer[sem_rear] = item;
-	printf("P put %d\n", item);
 }
 
 int sem_consume_item()//공유 버퍼에 있던 아이템을 가져온다.
@@ -19,7 +12,6 @@ int sem_consume_item()//공유 버퍼에 있던 아이템을 가져온다.
     int item;
 	item = sem_buffer[sem_front];
 	sem_front = (sem_front + 1) % 1;
-	printf("C get %d\n", item);
 	return item;
 }
 
@@ -27,11 +19,10 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 {
     clock_gettime(CLOCK_MONOTONIC,&sem_begin);
 	printf("begin time : %ldns\n",sem_begin.tv_nsec);
-	while (sem_count<sem_user_iter) {
-		printf("cnt------>%d\n",sem_count+1);
+	for(int i=0;i<sem_user_iter;i++){
 		sem_wait(&sem_empty); 
 		sem_wait(&sem_mutex);
-		sem_put_item(sem_produce_item());
+		sem_put_item();
 		sem_post(&sem_mutex);
 		sem_post(&sem_full);
 	}
@@ -43,13 +34,12 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 
 void* sem_consumer(void* arg)//소비자 쓰레드, 3가지 세마포어를 사용하여 버퍼에 있는 아이템을 가져온다.
 {
-    while(sem_count<=sem_user_iter) {
+    for(int i=0;i<sem_user_iter;i++) {
 		sem_wait(&sem_full);
 		sem_wait(&sem_mutex);
 		sem_consume_item();
 		sem_post(&sem_mutex);
 		sem_post(&sem_empty);
-		sem_count++;
 	}
 	printf("C is over\n");
 	return 0;
@@ -90,7 +80,7 @@ double sem_test_exec(int topology, int processes, int iter, int num_cpus)//테�
 	sem_destroy(&sem_mutex);
 	time = (sem_end.tv_sec-sem_begin.tv_sec) * 1000 + (double)(sem_end.tv_nsec-sem_begin.tv_nsec) / 1000000;
 
-	printf("time : {%4.6f}ns\n", time/sem_count);
+	printf("time : {%4.6f}ns\n", time/iter);
 	return time;
 }
 

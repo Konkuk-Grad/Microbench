@@ -30,8 +30,7 @@ struct timespec sem_begin, sem_end;
 /* --------- */
 /* Functions */
 /* --------- */
-int sem_produce_item();
-int sem_put_item(int item);
+int sem_put_item();
 int sem_consume_item();
 void* sem_producer(void* arg);
 void* sem_consumer(void* arg);
