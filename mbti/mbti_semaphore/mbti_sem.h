@@ -1,6 +1,8 @@
 /***** Parent Header *****/
-#include "../mbti.h"
-
+//#include "../mbti.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 // Start mbti_signal.h
 
 /* ------- */
