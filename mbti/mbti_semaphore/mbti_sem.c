@@ -52,7 +52,6 @@ double sem_test_exec(int topology, int processes, int iter, int num_cpus)//í…ŒìŠ
 	double time;
 
 	sem_user_iter = iter;
-    sem_count = 0;
 
 	if((sem_init(&sem_empty,0,1))!=0)
 	{
@@ -80,7 +79,7 @@ double sem_test_exec(int topology, int processes, int iter, int num_cpus)//í…ŒìŠ
 	sem_destroy(&sem_mutex);
 	time = (sem_end.tv_sec-sem_begin.tv_sec) * 1000 + (double)(sem_end.tv_nsec-sem_begin.tv_nsec) / 1000000;
 
-	printf("time : {%4.6f}ns\n", time/iter);
+	printf("time : {%4.6f}ms\n", time/iter);
 	return time;
 }
 
