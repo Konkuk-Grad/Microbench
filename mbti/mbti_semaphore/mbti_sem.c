@@ -19,7 +19,8 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 {
     clock_gettime(CLOCK_MONOTONIC,&sem_begin);
 	printf("begin time : %ldns\n",sem_begin.tv_nsec);
-	for(int i=0;i<sem_user_iter;i++){
+	for(int i=0;i<sem_user_iter;i++)
+    {
 		sem_wait(&sem_empty); 
 		sem_wait(&sem_mutex);
 		sem_put_item();
@@ -28,13 +29,14 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 	}
 	printf("P is over\n");
 	clock_gettime(CLOCK_MONOTONIC,&sem_end);
-	printf("end time : {%4.6ld}ns\n",sem_end.tv_nsec);
+	printf("end time : %ldns\n",sem_end.tv_nsec);
 	return 0;
 }
 
 void* sem_consumer(void* arg)//소비자 쓰레드, 3가지 세마포어를 사용하여 버퍼에 있는 아이템을 가져온다.
 {
-    for(int i=0;i<sem_user_iter;i++) {
+    for(int i=0;i<sem_user_iter;i++) 
+    {
 		sem_wait(&sem_full);
 		sem_wait(&sem_mutex);
 		sem_consume_item();
@@ -45,7 +47,7 @@ void* sem_consumer(void* arg)//소비자 쓰레드, 3가지 세마포어를 사�
 	return 0;
 }
 
-double sem_test_exec(int topology, int processes, int iter, int num_cpus)//테스트 실행
+double sem_iter_exec(int iter)//테스트 실행
 {
     pthread_t thread1;
 	pthread_t thread2;
@@ -83,8 +85,56 @@ double sem_test_exec(int topology, int processes, int iter, int num_cpus)//테�
 	return time;
 }
 
-int main(int argc, char *argv[]) {
+void sem_make_processes(int processes, int iter)//테스트 되는 프로세스 수만큼 생성 및 실행
+{
+	pid_t* pid;
+
+	pid = (pid_t*)malloc(sizeof(pid)*processes);
+	if(pid == NULL)
+		perror("malloc ERROR");
+
+	for (int i =0; i<processes;i++)
+    {
+        pid[i] = fork();
+        if(pid[i] > 0)
+        {
+            pid_t wait_pid;
+			int status;
+
+			while((((wait_pid = wait(&status)) == -1) && errno == EINTR));
+			//느린 시스템콜로 인해 비정상 종료되는 상황을 방지
+			if(wait_pid == -1)
+			{
+            	perror("Wait() ERROR");
+        	}
+        	else
+			{
+            	if(WIFEXITED(status))
+				{
+                printf("Wait() Child END : statue NO%d\n",WEXITSTATUS(status));
+            	}
+            else if(WIFSIGNALED(status))
+			{
+                printf("Wait() Child ERROR : NO%d\n",WTERMSIG(status));
+            }
+        }
+
+        }else if(pid[i] == 0)
+        {
+            sem_iter_exec(iter);
+            exit(0);
+        }else
+        {
+            perror("fork error");
+        }
+        
+    }
+}
+
+int main(int argc, char *argv[])
+{
     int iter = atoi(argv[1]);
-    sem_test_exec(0,0,iter,0);
+	int processes = atoi(argv[2]);
+    sem_make_processes(processes,iter);
     return 0;
 }

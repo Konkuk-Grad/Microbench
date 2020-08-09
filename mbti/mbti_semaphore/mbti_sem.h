@@ -14,6 +14,8 @@
 #include <time.h>
 #include <semaphore.h>
 #include <ctype.h>
+#include <sys/wait.h>
+#include <errno.h>
 
 /* ---------------- */
 /* Global Variables */
@@ -34,4 +36,5 @@ int sem_put_item();
 int sem_consume_item();
 void* sem_producer(void* arg);
 void* sem_consumer(void* arg);
-double sem_test_exec(int topology, int processes, int iter, int num_cpus);
+double sem_iter_exec(int iter);
+void sem_make_processes(int processes,int iter);
