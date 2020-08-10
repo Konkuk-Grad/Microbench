@@ -114,3 +114,35 @@ double sig_test(int topology, int processes, int iter, int num_cpus){
 ```bash
 gcc -o mbti.out mbti_main.c mbti_signal/mbti_signal.c mbti_signal/mbti_sig_xx.c -lrt 
 ```
+
+## 6. Core Affinity 적용 여부 확인 방법
+
+1. 다음 명령어를 실행한다.
+- 본인의 실행파일 명령어가 ./mbti.out 1 8 100000 1 일 경우
+    ``` bash
+    sudo trace-cmd record -e all ./mbti.out 1 8 100000 1
+    ```
+
+2. 원격 데스크톱으로 접속한다.
+  - a. 윈도우+R을 누르고 mstsc 입력
+  - b. 해당 IP와 Port를 입력 후 접속
+  - c. session id/pw에 본인의 id/pw 입력
+
+3. 원격 데스크탑에서 terminal을 실행한다.
+4. terminal에서 1의 sudo 명령어를 실행한 디렉터리로 이동한다.
+5. ***ls*** 를 입력하여 **trace.dat**이 있는지 확인한다.
+6. ***kernelshark*** 명령어를 입력한다.
+7. ***kernelshark*** 사용법
+    1. 초기화면 ![Init Kernelshark](.readme/kernel_shark_1.PNG)
+
+    2. 필터설정 ![Set Filter](.readme/kernel_shark_2.PNG)
+    - 저기서 Show events, tasks, CPUs를 통해 필터링 할 수 있음.
+    
+    3. Tasks 필터링 ![Filter tasks](.readme/kernel_shark_3.PNG)
+    - 이 중에서 우리가 필터링 해야하는건 현 프로젝트의 실행파일인 **mbti.out**이다.
+    - 체크에 Hide라고 되어있는것이 아니라
+    - trace-cmd를 filtering 하지 말것
+    
+    4. 필터링 결과 ![Filtering result](.readme/kernel_shark_4.PNG)
+    
+    5. 결론은 이거 열심히 필터링 해서 확인하시면 됩니다.
