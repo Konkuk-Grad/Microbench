@@ -2,16 +2,17 @@
 
 int main(int argc, char *argv[]){
 
-    int topology, pairs, iter, cores;
+    int mode, topology, pairs, iter, cores;
 
     /* 
-    * 1. Topology
-    * 2. Number of pairs
-    * 3. Number of iterations
-    * 4. Number of cores
+    * 1. Mode
+    * 2. Topology
+    * 3. Number of pairs
+    * 4. Number of iterations
+    * 5. Number of cores
     */
 
-    if(argc != 5){
+    if(argc != 6){
         printf("[ERROR] argc is must be 5 (Input: %d)\n", argc);
         return -1;
     }
@@ -22,16 +23,26 @@ int main(int argc, char *argv[]){
             return -1;
         }
     }
-
-    topology = atoi(argv[1]);
-    pairs = atoi(argv[2]);
-    iter = atoi(argv[3]);
-    cores = atoi(argv[4]);
+    
+    mode = atoi(argv[1]);
+    topology = atoi(argv[2]);
+    pairs = atoi(argv[3]);
+    iter = atoi(argv[4]);
+    cores = atoi(argv[5]);
 
     double measure_time = 0;
-    switch(topology){
-        case 1: // Ping-pong
+    switch(mode){
+        case 1: // Signal
             measure_time = sig_test(topology, pairs, iter, cores);
+            break;
+        case 2: // IPC
+            // Execute function
+            break;
+        case 3: // Semaphore
+            // Execute function
+            break;
+        case 4: // Mutex
+            // Execute function
             break;
         default:
             break;
