@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -9,10 +10,7 @@
 
 #ifndef PTHREAD_ATTR
     #define PTHREAD_ATTR
-/* This two line is */
-/* for arrival time in mutex */
-// struct timespec *arrive_point, *run_point;
-// double * response_time;
+
     struct timespec *pthread_start_point, *pthread_end_point;
     unsigned int pthread_try_count;
     unsigned int pthread_thread_num;
@@ -21,9 +19,9 @@
     pthread_mutex_t pthread_lock;
     pthread_mutex_t pthread_condition_lock;
     pthread_cond_t pthread_cond;
-/* This Func is for "main Func" */
-/* which has nested header */
+
 #endif
     double pthread_test(int topology, int processes, int iter, int num_cpus);
-
+    void init_pthread();
+    void return_result(pthread_t *p_thread);
 
