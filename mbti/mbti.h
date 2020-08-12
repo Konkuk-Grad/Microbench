@@ -27,7 +27,7 @@
 #include "mbti_ipc/mbti_ipc.h"
 
 /* 3. Semaphore Header */
-// #include "mbti_semaphore/mbti_sem.h"
+#include "mbti_semaphore/mbti_sem.h"
 
 /* 4. Mutex Header */
 // #include "mbti_mutex/mbti_mutex.h"
