@@ -36,6 +36,7 @@ int main(int argc, char *argv[]){
             measure_time = sig_test(topology, pairs, iter, cores);
             break;
         case 2: // IPC
+	    measure_time = ipc_test(topology, pairs, iter, cores);
             // Execute function
             break;
         case 3: // Semaphore
