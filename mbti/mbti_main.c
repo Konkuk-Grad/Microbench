@@ -3,6 +3,7 @@
 int main(int argc, char *argv[]){
 
     int mode, topology, pairs, iter, cores;
+    long long iter;
 
     /* 
     * 1. Mode
@@ -27,7 +28,7 @@ int main(int argc, char *argv[]){
     mode = atoi(argv[1]);
     topology = atoi(argv[2]);
     pairs = atoi(argv[3]);
-    iter = atoi(argv[4]);
+    iter = atoll(argv[4]); // For applying a large iteration number.
     cores = atoi(argv[5]);
 
     double measure_time = 0;
@@ -36,7 +37,7 @@ int main(int argc, char *argv[]){
             measure_time = sig_test(topology, pairs, iter, cores);
             break;
         case 2: // IPC
-	    measure_time = ipc_test(topology, pairs, iter, cores);
+	        measure_time = ipc_test(topology, pairs, iter, cores);
             // Execute function
             break;
         case 3: // Semaphore
@@ -49,7 +50,7 @@ int main(int argc, char *argv[]){
             break;
     }
 
-    printf("measure_time: %f\n", measure_time);
+    printf("measure_time: {%f} ms\n", measure_time);
     
     return 0;
 }
