@@ -10,6 +10,7 @@
 
 #ifndef PTHREAD_ATTR
     #define PTHREAD_ATTR 1
+    extern cpu_set_t pthread_mask;
     extern struct timespec *pthread_start_point, *pthread_end_point;
     extern unsigned int pthread_try_count;
     extern unsigned int pthread_thread_num;
@@ -22,5 +23,6 @@
     double pthread_test(int topology, int processes, int iter, int num_cpus);
     void init_pthread();
     double return_result();
+    void pthread_setaffinity();
 #endif
 

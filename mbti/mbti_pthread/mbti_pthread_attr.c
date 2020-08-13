@@ -8,3 +8,4 @@
     pthread_mutex_t pthread_lock;
     pthread_mutex_t pthread_condition_lock;
     pthread_cond_t pthread_cond;
+    cpu_set_t pthread_mask;

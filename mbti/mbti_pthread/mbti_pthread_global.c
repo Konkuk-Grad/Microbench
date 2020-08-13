@@ -11,7 +11,8 @@ void* pthread_global_thread_act(void* arg){
     unsigned int l_counter;
     int thread_id = (int)arg;
     pid_t tid;
-
+   
+    pthread_setaffinity();
     pthread_mutex_lock(&pthread_condition_lock);
     pthread_ready_flag+=1;
     while(pthread_ready_flag != pthread_thread_num){

@@ -25,6 +25,14 @@ double return_result(){
     }
     return measure/pthread_thread_num;
 }
+/* Setting affinity to core */
+void pthread_setaffinity(){
+    pthread_t current_thread = pthread_self();
+    if(pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &pthread_mask)){
+        fprintf(stderr, "affinity error");
+        exit(0);
+    }
+}
 /* This function is technical main function for pthread test case */
 /* 1. Allocate global variable from argc, argv from main function */
 /* 2. Set CPU affinity                                            */ 
@@ -34,8 +42,6 @@ double return_result(){
 /* 6. Call exit_pthread                                           */
 double pthread_test(int topology, int processes, int iter, int num_cpus){
     pthread_t *p_thread;
-    pid_t pid;
-    cpu_set_t mask;
     int pthread_id;
     int cpu = 0;
     void* thread_func;
@@ -47,12 +53,9 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
     init_pthread();
 
     //2.
-    CPU_ZERO(&mask);
+    CPU_ZERO(&pthread_mask);
     for(int i = 0; i < num_cpus; i++){
-        CPU_SET(i, &mask);
-    }
-    if(sched_setaffinity(pid, sizeof(mask),&mask)){
-        exit(1);
+        CPU_SET(i, &pthread_mask);
     }
 
     //3.
