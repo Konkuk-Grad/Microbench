@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 {
     int iter = atoi(argv[1]);
 	int processes = atoi(argv[2]);
-	int num_cpus = ator(argv[3]);
+	int num_cpus = atoi(argv[3]);
     sem_make_processes(processes,iter,num_cpus);
     return 0;
 }
