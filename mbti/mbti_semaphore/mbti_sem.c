@@ -7,6 +7,27 @@ int sem_put_item()//공유 버퍼에 생상한 아이템을 넣는다.
 	sem_buffer[sem_rear] = item;
 }
 
+void sem_set_core_affinities(int num_cpus)
+{
+	cpu_set_t cpuset;
+	int result;
+	pthread_t current_thread = pthread_self();
+
+	CPU_ZERO(&cpuset);
+    for (int j = 0; j < num_cpus; j++)
+    {
+		CPU_SET(j, &cpuset);
+		printf("%d\n",j);
+	}   
+	
+	result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
+    if(result != 0)
+	{
+        printf("pid [%d] pthread_setaffinity_np failed!\n", getpid());
+    }
+
+}
+
 int sem_consume_item()//공유 버퍼에 있던 아이템을 가져온다.
 {
     int item;
@@ -17,17 +38,8 @@ int sem_consume_item()//공유 버퍼에 있던 아이템을 가져온다.
 
 void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세마포어를 이용하여 값을 생산하고 버퍼에 추가한다.
 {
-	cpu_set_t cpuset;
 	int num_cpus = *((int*)arg);
-	CPU_ZERO(&cpuset);
-    CPU_SET(num_cpus, &cpuset);
-	pthread_t current_thread = pthread_self();
-	int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
-    if(result == -1)
-	{
-        printf("pid [%d] sched_setaffinity failed!\n", getpid());
-    } 
-
+	sem_set_core_affinities(num_cpus);
     clock_gettime(CLOCK_MONOTONIC,&sem_begin);
 	printf("begin time : %ldns\n",sem_begin.tv_nsec);
 	for(int i=0;i<sem_user_iter;i++)
@@ -46,17 +58,8 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 
 void* sem_consumer(void* arg)//소비자 쓰레드, 3가지 세마포어를 사용하여 버퍼에 있는 아이템을 가져온다.
 {
-	cpu_set_t cpuset;
 	int num_cpus = *((int*)arg);
-	CPU_ZERO(&cpuset);
-    CPU_SET(num_cpus, &cpuset);
-	pthread_t current_thread = pthread_self();
-	int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
-    if(result == -1)
-	{
-        printf("pid [%d] sched_setaffinity failed!\n", getpid());
-    }
-
+	sem_set_core_affinities(num_cpus);
     for(int i=0;i<sem_user_iter;i++) 
     {
 		sem_wait(&sem_full);

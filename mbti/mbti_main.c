@@ -39,7 +39,7 @@ int main(int argc, char *argv[]){
             // Execute function
             break;
         case 3: // Semaphore
-            // Execute function
+            sem_make_processes(pairs,iter,cores);
             break;
         case 4: // Mutex
             // Execute function

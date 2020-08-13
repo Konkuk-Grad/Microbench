@@ -14,7 +14,7 @@
 #include <ctype.h>
 #include <sys/wait.h>
 #include <errno.h>
-
+#include <sched.h>
 /* ---------------- */
 /* Global Variables */
 /* ---------------- */
@@ -36,3 +36,4 @@ void* sem_producer(void* arg);
 void* sem_consumer(void* arg);
 double sem_iter_exec(int iter,int num_cpus);
 void sem_make_processes(int processes,int iter,int num_cpus);
+void sem_set_core_affinities(int num_cpus);
