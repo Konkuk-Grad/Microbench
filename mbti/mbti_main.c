@@ -36,13 +36,14 @@ int main(int argc, char *argv[]){
             measure_time = sig_test(topology, pairs, iter, cores);
             break;
         case 2: // IPC
-	    measure_time = ipc_test(topology, pairs, iter, cores);
+            measure_time = ipc_test(topology, pairs, iter, cores);
             // Execute function
             break;
         case 3: // Semaphore
             // Execute function
             break;
         case 4: // Mutex
+            measure_time = pthread_test(topology, pairs, iter, cores);
             // Execute function
             break;
         default:
