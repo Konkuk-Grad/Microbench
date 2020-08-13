@@ -7,21 +7,21 @@ int sem_put_item()//공유 버퍼에 생상한 아이템을 넣는다.
 	sem_buffer[sem_rear] = item;
 }
 
-void sem_set_core_affinities(int num_cpus)
+void sem_set_core_affinities(int num_cpus)//코어설정 함수
 {
 	cpu_set_t cpuset;
 	int result;
-	pthread_t current_thread = pthread_self();
+	pthread_t current_thread = pthread_self();//현재 쓰레드에 cpu를 할당하기 위해 현재 쓰레드 지정
 
-	CPU_ZERO(&cpuset);
+	CPU_ZERO(&cpuset);//cpu 초기화
     for (int j = 0; j < num_cpus; j++)
     {
-		CPU_SET(j, &cpuset);
-		printf("%d\n",j);
+		CPU_SET(j, &cpuset);//0~core의 수만큼 활성화되도록 set에 추가
+		printf("thread id : %d\n",(int)current_thread);
 	}   
 	
 	result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
-    if(result != 0)
+    if(result != 0)//쓰레드 별로 할당 되지 않았다면 오류 출력
 	{
         printf("pid [%d] pthread_setaffinity_np failed!\n", getpid());
     }
@@ -41,7 +41,7 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 	int num_cpus = *((int*)arg);
 	sem_set_core_affinities(num_cpus);
     clock_gettime(CLOCK_MONOTONIC,&sem_begin);
-	printf("begin time : %ldns\n",sem_begin.tv_nsec);
+	printf("begin time : %ldns\n",sem_begin.tv_nsec);//생산자가 공유 버퍼에 값을 집어 넣으면서 시작.
 	for(int i=0;i<sem_user_iter;i++)
     {
 		sem_wait(&sem_empty); 
@@ -53,6 +53,7 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 	printf("P is over\n");
 	clock_gettime(CLOCK_MONOTONIC,&sem_end);
 	printf("end time : %ldns\n",sem_end.tv_nsec);
+	//생산자의 역할을 마치고 시간측정 종료, 뒤는 소비자가 가져가기만 할 뿐 시그널의 전달x라고 판단
 	return 0;
 }
 
