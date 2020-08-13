@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+
 #endif
 
 // Start mbti.h
@@ -22,7 +24,7 @@
 #include "mbti_signal/mbti_signal.h"
 
 /* 2. IPC Header */
-// #include "mbti_ipc/mbti_ipc.h"
+#include "mbti_ipc/mbti_ipc.h"
 
 /* 3. Semaphore Header */
 #include "mbti_semaphore/mbti_sem.h"
