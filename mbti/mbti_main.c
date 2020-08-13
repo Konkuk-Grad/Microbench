@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[]){
 
-    int mode, topology, pairs, iter, cores;
+    int mode, topology, pairs, cores;
     long long iter;
 
     /* 
