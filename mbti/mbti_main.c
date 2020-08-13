@@ -31,8 +31,10 @@ int main(int argc, char *argv[]){
     double measure_time = 0;
     switch(topology){
         case 1: // Ping-pong
-            measure_time = sig_test(topology, pairs, iter, cores);
+            // measure_time = sig_test(topology, pairs, iter, cores);
             break;
+        case 2: // MUTEX
+            measure_time = pthread_test(topology, pairs, iter, cores);
         default:
             break;
     }

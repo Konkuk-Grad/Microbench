@@ -1,4 +1,4 @@
-#include "global/global_attr.h"
+#include "mbti_pthread_global.h"
 #include "mbti_pthread.h"
 
 /* This function is for initilize all variable which is used for later use */ 
@@ -17,15 +17,13 @@ void exit_pthread(){
     free(pthread_end_point);
 }
 /* This function is from calculate time spent */
-void return_result(pthread_t *p_thread){
+double return_result(){
     double measure = 0;
-    int status;
     for(int i = 0; i < pthread_thread_num; i++){
-        pthread_join(p_thread[i],(void**)&status);
-        measure = ((pthread_end_point[i].tv_sec - pthread_start_point[i].tv_sec) * 1000 + 
+        measure += ((pthread_end_point[i].tv_sec - pthread_start_point[i].tv_sec) * 1000 + 
         (double)(pthread_end_point[i].tv_nsec - pthread_start_point[i].tv_nsec) / 1000000);
-        fprintf(stdout,"{%7d}\n", measure);
     }
+    return measure/pthread_thread_num;
 }
 /* This function is technical main function for pthread test case */
 /* 1. Allocate global variable from argc, argv from main function */
@@ -41,6 +39,8 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
     int pthread_id;
     int cpu = 0;
     void* thread_func;
+    int status;
+    double res;
     //1. 
     pthread_try_count = iter;
     pthread_thread_num = processes;
@@ -65,13 +65,13 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
     case 2:
         // thread_func = pthread_elses_blabla
     default:
+        thread_func = pthread_global_thread_act;
         break;
     }
 
     //4. 
     p_thread = (pthread_t*)malloc(sizeof(pthread_t)*pthread_thread_num);
     for(int i = 0; i < pthread_thread_num; i++){
-        // response_time[i] = 0;
         pthread_id = pthread_create(&p_thread[i], NULL, thread_func, (void*)i);
         if (pthread_id < 0){
             perror("[pthread_create]");
@@ -79,8 +79,11 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
         }
     }
     //5.
-    return_result(p_thread);
+    for(int i = 0; i < pthread_thread_num; i++){
+        pthread_join(p_thread[i],(void**)&status);
+    }
+    res = return_result();
     exit_pthread();
     free(p_thread);
-    return 0;
+    return res; 
 }

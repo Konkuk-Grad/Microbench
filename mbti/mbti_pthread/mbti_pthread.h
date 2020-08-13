@@ -9,19 +9,18 @@
 #include <sys/types.h>
 
 #ifndef PTHREAD_ATTR
-    #define PTHREAD_ATTR
+    #define PTHREAD_ATTR 1
+    extern struct timespec *pthread_start_point, *pthread_end_point;
+    extern unsigned int pthread_try_count;
+    extern unsigned int pthread_thread_num;
+    extern unsigned int pthread_ready_flag;
+    extern long pthread_ncores;
+    extern pthread_mutex_t pthread_lock;
+    extern pthread_mutex_t pthread_condition_lock;
+    extern pthread_cond_t pthread_cond;
 
-    struct timespec *pthread_start_point, *pthread_end_point;
-    unsigned int pthread_try_count;
-    unsigned int pthread_thread_num;
-    unsigned int pthread_ready_flag = 0;
-    long pthread_ncores;
-    pthread_mutex_t pthread_lock;
-    pthread_mutex_t pthread_condition_lock;
-    pthread_cond_t pthread_cond;
-
-#endif
     double pthread_test(int topology, int processes, int iter, int num_cpus);
     void init_pthread();
-    void return_result(pthread_t *p_thread);
+    double return_result();
+#endif
 

@@ -1,5 +1,5 @@
-#include "global_attr.h"
-#include "../mbti_pthread.h"
+#include "mbti_pthread_global.h"
+#include "mbti_pthread.h"
 
 void increase_counter(int thread_id){
     pthread_mutex_lock(&pthread_lock);
