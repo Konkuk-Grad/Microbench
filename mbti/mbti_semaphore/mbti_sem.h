@@ -1,9 +1,7 @@
 /***** Parent Header *****/
-//#include "../mbti.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-// Start mbti_signal.h
+#include "../mbti.h"
+
+// Start mbti_sem.h
 
 /* ------- */
 /* Headers */
@@ -36,5 +34,5 @@ int sem_put_item();
 int sem_consume_item();
 void* sem_producer(void* arg);
 void* sem_consumer(void* arg);
-double sem_iter_exec(int iter);
-void sem_make_processes(int processes,int iter);
+double sem_iter_exec(int iter,int num_cpus);
+void sem_make_processes(int processes,int iter,int num_cpus);

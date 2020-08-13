@@ -17,6 +17,17 @@ int sem_consume_item()//공유 버퍼에 있던 아이템을 가져온다.
 
 void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세마포어를 이용하여 값을 생산하고 버퍼에 추가한다.
 {
+	cpu_set_t cpuset;
+	int num_cpus = *((int*)arg);
+	CPU_ZERO(&cpuset);
+    CPU_SET(num_cpus, &cpuset);
+	pthread_t current_thread = pthread_self();
+	int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
+    if(result == -1)
+	{
+        printf("pid [%d] sched_setaffinity failed!\n", getpid());
+    } 
+
     clock_gettime(CLOCK_MONOTONIC,&sem_begin);
 	printf("begin time : %ldns\n",sem_begin.tv_nsec);
 	for(int i=0;i<sem_user_iter;i++)
@@ -35,6 +46,17 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 
 void* sem_consumer(void* arg)//소비자 쓰레드, 3가지 세마포어를 사용하여 버퍼에 있는 아이템을 가져온다.
 {
+	cpu_set_t cpuset;
+	int num_cpus = *((int*)arg);
+	CPU_ZERO(&cpuset);
+    CPU_SET(num_cpus, &cpuset);
+	pthread_t current_thread = pthread_self();
+	int result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
+    if(result == -1)
+	{
+        printf("pid [%d] sched_setaffinity failed!\n", getpid());
+    }
+
     for(int i=0;i<sem_user_iter;i++) 
     {
 		sem_wait(&sem_full);
@@ -47,7 +69,7 @@ void* sem_consumer(void* arg)//소비자 쓰레드, 3가지 세마포어를 사�
 	return 0;
 }
 
-double sem_iter_exec(int iter)//테스트 실행
+double sem_iter_exec(int iter,int num_cpus)//테스트 실행
 {
     pthread_t thread1;
 	pthread_t thread2;
@@ -71,8 +93,8 @@ double sem_iter_exec(int iter)//테스트 실행
 		return -1;
 	}
 
-	pthread_create(&thread1, NULL, sem_consumer, NULL);
-	pthread_create(&thread2, NULL, sem_producer, NULL);
+	pthread_create(&thread1, NULL, sem_consumer, (void *)&num_cpus);
+	pthread_create(&thread2, NULL, sem_producer, (void *)&num_cpus);
 	pthread_join(thread1, NULL);
 	pthread_join(thread2, NULL);
 
@@ -85,7 +107,7 @@ double sem_iter_exec(int iter)//테스트 실행
 	return time;
 }
 
-void sem_make_processes(int processes, int iter)//테스트 되는 프로세스 수만큼 생성 및 실행
+void sem_make_processes(int processes, int iter,int num_cpus)//테스트 되는 프로세스 수만큼 생성 및 실행
 {
 	pid_t* pid;
 
@@ -121,7 +143,7 @@ void sem_make_processes(int processes, int iter)//테스트 되는 프로세스 
 
         }else if(pid[i] == 0)
         {
-            sem_iter_exec(iter);
+            sem_iter_exec(iter,num_cpus);
             exit(0);
         }else
         {
@@ -135,6 +157,7 @@ int main(int argc, char *argv[])
 {
     int iter = atoi(argv[1]);
 	int processes = atoi(argv[2]);
-    sem_make_processes(processes,iter);
+	int num_cpus = ator(argv[3]);
+    sem_make_processes(processes,iter,num_cpus);
     return 0;
 }
