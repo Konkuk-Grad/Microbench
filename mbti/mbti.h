@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #endif
 
@@ -23,13 +24,13 @@
 #include "mbti_signal/mbti_signal.h"
 
 /* 2. IPC Header */
-// #include "mbti_ipc/mbti_ipc.h"
+#include "mbti_ipc/mbti_ipc.h"
 
 /* 3. Semaphore Header */
 #include "mbti_semaphore/mbti_sem.h"
 
-/* 4. Mutex Header */
-// #include "mbti_mutex/mbti_mutex.h"
+/* 4. pthread Header */
+#include "mbti_pthread/mbti_pthread.h"
 
 /* 5. TCP/IP Header */
 // #include "mbti_network/mbti_network.h"

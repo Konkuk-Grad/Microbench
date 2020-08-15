@@ -109,11 +109,22 @@ double sig_test(int topology, int processes, int iter, int num_cpus){
 - 실행 파일명은 **"mbti.out"** 으로 하고 mbti_main.c를 포함한 **모든 폴더의 c파일**을 포함시켜야 한다.
 - 컴파일 옵션은 현재는 **-lrt** 를 붙여야 하며 이 이후에 추가될 예정이다.
 
-- **cmake** 를 이용하여 컴파일의 용이성을 찾으려 하고 있다.
+- ~~**cmake** 를 이용하여 컴파일의 용이성을 찾으려 하고 있다.~~
+-> **cmake**를 활용한 컴파일 방식을 채택
+  - ***cmake .*** 를 먼저 입력하여 Makefile을 생성
+  - ***make*** 를 입력하여 컴파일 실행
+    ```bash
+    $ cmake . && make 
+    ```
 
-```bash
-gcc -o mbti.out mbti_main.c mbti_signal/mbti_signal.c mbti_signal/mbti_sig_xx.c -lrt 
-```
+  - 현재 컴파일 옵션은 -lrt 해당하는 옵션만 추가되어 있고 추가적인 컴파일 옵션은 다음의 명령어를 추가하면 됨.
+      - mbti/CMakeLists.txt에 맨 아래줄에 target_link_libraries라는 명령어가 있다. 이 명령어를 작성된 양식으로 적으면 된다.
+      - 예를 들어 gcc 컴파일 시 -lpthread 라는 라이브러리 링크가 필요할 경우
+    ```Makefile
+    target_link_libraries(mbti.out pthread)
+    ```
+      로 적으면 된다. (lpthread중 l을 제외하고 pthread를 입력해야한다.)
+
 
 ## 6. Core Affinity 적용 여부 확인 방법
 
