@@ -1,5 +1,18 @@
 #include "mbti_sem.h"
 
+void make_shm()
+{    
+    if ( -1 == ( shm_id = shmget( (key_t)shm_key, shm_size, IPC_CREAT|0666)))
+    {
+        perror("SHMGET ERROR");
+    }
+
+    if ( ( void *)-1 == ( shm_addr = shmat( shm_id, ( void *)0, 0)))
+    {
+        perror("SHMAT ERROR");
+    }
+}
+
 int sem_put_item()//공유 버퍼에 생상한 아이템을 넣는다.
 {
     int item = rand()%50;
@@ -106,21 +119,25 @@ double sem_iter_exec(int iter,int num_cpus)//테스트 실행
 	return time;
 }
 
-void sem_make_processes(int processes, int iter,int num_cpus)//테스트 되는 프로세스 수만큼 생성 및 실행
+double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되는 프로세스 수만큼 생성 및 실행
 {
 	pid_t* pid;
-	int time;
 	pid = (pid_t*)malloc(sizeof(pid)*processes);
 	if(pid == NULL)
 		perror("malloc ERROR");
 
-	for (int i =0; i<processes;i++)
+    double *time;
+    double result;
+    make_shm();
+
+	for (int i = 0 ; i < processes ; i++)
     {
         pid[i] = fork();
         if(pid[i] == 0)
         {
-			printf("")
-            sem_iter_exec(iter,num_cpus);
+            make_shm();
+            time = (double*)shm_addr;
+            *(time+i) = sem_iter_exec(iter,num_cpus);
         }else if(pid[i] < 0)
         {
             perror("fork error");
@@ -136,32 +153,19 @@ void sem_make_processes(int processes, int iter,int num_cpus)//테스트 되는 
 		{
 			while((((wait_pid = wait(&status)) == -1) && errno == EINTR));	
 			//느린 시스템콜로 인해 비정상 종료되는 상황을 방지
-			
-			if(wait_pid == -1)
-			{
-    			perror("Wait() ERROR");
-    	    }
-    	    else
-			{
-    	    	if(WIFEXITED(status))
-				{
-                	printf("Wait() Child END : statue NO%d\n",WEXITSTATUS(status));
-            	}
-            	else if(WIFSIGNALED(status))
-				{
-            	    printf("Wait() Child ERROR : NO%d\n",WTERMSIG(status));
-            	}
-        
-    		}
-		}
-	}	
-}
 
-int main(int argc, char *argv[])
-{
-    int iter = atoi(argv[1]);
-	int processes = atoi(argv[2]);
-	int num_cpus = atoi(argv[3]);
-    sem_make_processes(processes,iter,num_cpus);
-    return 0;
+            if(WIFEXITED(status))
+            {
+                result += *((double*)shm_addr+i);
+                //printf("Wait() Child END : statue NO%d\n",WEXITSTATUS(status));
+            }
+            else if(WIFSIGNALED(status))
+            {
+                printf("Wait() Child %d ERROR : NO%d\n",i,WTERMSIG(status));
+            }
+        
+		}
+	}
+
+    return result;
 }
