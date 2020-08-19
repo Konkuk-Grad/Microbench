@@ -74,6 +74,7 @@ void pthread_spsc_thread_act(){
 
 void* pthread_producer(void* arg){
     int iter = (int)arg;
+    pthread_setaffinity();
     clock_gettime(CLOCK_MONOTONIC, &p_msg.start_point);
     for(int i = 0; i < iter; i++){
         //producing
@@ -101,6 +102,7 @@ void* pthread_producer(void* arg){
 
 void* pthread_consumer(void* arg){
     int iter = (int)arg;
+    pthread_setaffinity();
     for(int i = 0; i < iter; i++){
         //consume
         pthread_mutex_lock(&pthread_lock);
