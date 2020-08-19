@@ -37,6 +37,22 @@ void pthread_setaffinity(){
         exit(0);
     }
 }
+void create_pthread(void* thread_func){
+    pthread_t *p_thread = (pthread_t*)malloc(sizeof(pthread_t)*pthread_thread_num);
+    int pthread_id;
+    int status;
+    for(int i = 0; i < pthread_thread_num; i++){
+        pthread_id = pthread_create(&p_thread[i], NULL, thread_func, (void*)i);
+        if (pthread_id < 0){
+            perror("[pthread_create]");
+            exit(0);
+        }
+    }
+    for(int i = 0; i < pthread_thread_num; i++){
+            pthread_join(p_thread[i],(void**)&status);
+    }
+    free(p_thread); 
+}
 /* This function is technical main function for pthread test case */
 /* 1. Allocate global variable from argc, argv from main function */
 /* 2. Set CPU affinity                                            */ 
@@ -45,13 +61,9 @@ void pthread_setaffinity(){
 /* 5. Call return_result                                          */
 /* 6. Call exit_pthread                                           */
 double pthread_test(int topology, int processes, int iter, int num_cpus){
-    pthread_t *p_thread;
-    int pthread_id;
     int cpu = 0;
     void* thread_func;
     double res = 0;
-    pid_t pid;
-    int status;
     //1. 
     pthread_try_count = iter;
     pthread_thread_num = processes;
@@ -71,7 +83,7 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
         break;
     /* For later use */
     case 2:
-        thread_func = pthread_spsc_thread_act;
+        thread_func = pthread_create_pair;
         break;
     default:
         thread_func = pthread_global_thread_act;
@@ -80,52 +92,9 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
 
     //4. 
     if(topology != 2){
-        p_thread = (pthread_t*)malloc(sizeof(pthread_t)*pthread_thread_num);
-        for(int i = 0; i < pthread_thread_num; i++){
-            pthread_id = pthread_create(&p_thread[i], NULL, thread_func, (void*)i);
-            if (pthread_id < 0){
-                perror("[pthread_create]");
-                exit(0);
-            }
-        }
-        for(int i = 0; i < pthread_thread_num; i++){
-                pthread_join(p_thread[i],(void**)&status);
-        }
-        free(p_thread);
+        create_pthread(thread_func);
     } else {
         ((void(*)())thread_func)();
-        struct mq_attr attr;
-        attr.mq_maxmsg = pthread_thread_num;
-        attr.mq_msgsize = sizeof(struct pthread_msg);
-        struct pthread_msg msg;
-        mqd_t mfd;
-        mfd = mq_open("/mbti_pthread", O_RDWR | O_CREAT, 0666, &attr);
-    
-        if(mfd == -1){
-            perror("[msgget]");
-            exit(0);
-        }
-        for(int i = 0; i < pthread_thread_num; i++){
-            pid = fork();
-            if(pid == 0){
-                ((void(*)())thread_func)();
-                exit(0);
-            } else if(pid <0 ){
-                perror("[fork]");
-            }
-        }
-        if(pid != 0){
-            for(int i = 0; i < pthread_thread_num; i++){
-                if((mq_receive(mfd, (char*)&msg,attr.mq_msgsize,NULL)) == -1){
-                    exit(-1);
-                }
-                pthread_start_point[i] = msg.start_point;
-                pthread_end_point[i] = msg.end_point;
-            }
-            // for(int i = 0; i < pthread_thread_num; i++){
-            //    wait(&status);
-            // } 
-        }
     }
    //5.
     res = return_result();

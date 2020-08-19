@@ -5,7 +5,7 @@
 #include <string.h>
 
 int full, full2;
-struct pthread_msg msg;
+struct pthread_msg p_msg;
 pthread_cond_t pthread_empty;
 pthread_cond_t pthread_full;
 pthread_cond_t pthread_empty2;
@@ -14,6 +14,42 @@ pthread_cond_t pthread_full2;
 pthread_mutex_t pthread_lock2;
 
 char buf[256];
+void pthread_create_pair(){
+    int pid;
+    struct mq_attr attr;
+    attr.mq_maxmsg = pthread_thread_num;
+    attr.mq_msgsize = sizeof(struct pthread_msg);
+    struct pthread_msg msg;
+    mqd_t mfd;
+    mfd = mq_open("/mbti_pthread", O_RDWR | O_CREAT, 0666, &attr);
+
+    if(mfd == -1){
+        perror("[msgget]");
+        exit(0);
+    }
+    for(int i = 0; i < pthread_thread_num; i++){
+        pid = fork();
+        if(pid == 0){
+            pthread_spsc_thread_act();
+            exit(0);
+        } else if(pid <0 ){
+            perror("[fork]");
+        }
+    }
+    if(pid != 0){
+        for(int i = 0; i < pthread_thread_num; i++){
+            if((mq_receive(mfd, (char*)&msg,attr.mq_msgsize,NULL)) == -1){
+                exit(-1);
+            }
+            pthread_start_point[i] = msg.start_point;
+            pthread_end_point[i] = msg.end_point;
+        }
+        // for(int i = 0; i < pthread_thread_num; i++){
+        //    wait(&status);
+        // } 
+    }
+}
+
 void pthread_spsc_thread_act(){
     struct mq_attr attr;
     attr.mq_maxmsg = pthread_thread_num;
@@ -25,7 +61,6 @@ void pthread_spsc_thread_act(){
         exit(0);
     }
     full = full2 = 0;
-    fprintf(stderr,"dbg\n");
     pthread_t thread_id[2];
     pthread_mutex_init(&pthread_lock2,NULL);
     pthread_cond_init(&pthread_empty,NULL);
@@ -42,7 +77,7 @@ void pthread_spsc_thread_act(){
     }
     pthread_join(thread_id[0],NULL);
     pthread_join(thread_id[1],NULL);
-    if((mq_send(mfd, (char*)&msg, attr.mq_msgsize, 1)) == -1){
+    if((mq_send(mfd, (char*)&p_msg, attr.mq_msgsize, 1)) == -1){
         perror("[mq_send]");
         exit(-1);
     }
@@ -50,7 +85,7 @@ void pthread_spsc_thread_act(){
 
 void* pthread_producer(void* arg){
     int iter = (int)arg;
-    clock_gettime(CLOCK_MONOTONIC, &msg.start_point);
+    clock_gettime(CLOCK_MONOTONIC, &p_msg.start_point);
     for(int i = 0; i < iter; i++){
         //producing
         pthread_mutex_lock(&pthread_lock);
@@ -72,7 +107,7 @@ void* pthread_producer(void* arg){
         pthread_cond_signal(&pthread_full2);
         pthread_mutex_unlock(&pthread_lock2);
     }
-    clock_gettime(CLOCK_MONOTONIC, &msg.end_point);
+    clock_gettime(CLOCK_MONOTONIC, &p_msg.end_point);
 }
 
 void* pthread_consumer(void* arg){
