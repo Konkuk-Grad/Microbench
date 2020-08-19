@@ -22,7 +22,7 @@
 /* ---------------- */
 static sem_t sem_empty, sem_full, sem_mutex;
 //버퍼가 비었는지, 찼는지, 버퍼에 접근 가능한지에 대한 semaphore변수
-int sem_buffer[1], sem_front, sem_rear,shm_id;
+int sem_buffer[1024], sem_front, sem_rear,shm_id;
 //scsp 상황에서 공유되는 버퍼, 버퍼의 앞 과 뒤를 가르키는 변수, 공유메모리 id
 int sem_user_iter,sem_user_processes;
 //유저가 입력한 반복 횟수, 유저가 입력한 프로세스 개수

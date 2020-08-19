@@ -135,9 +135,9 @@ double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되�
         if((pid[i] = fork()) < 0)
         {
             perror("fork error");
+			return -1;
         }else if(pid[i] == 0)
         {
-			make_shm();
             time = (double*)shm_addr;
             *(time+i) = sem_iter_exec(iter,num_cpus);
 			exit(0);
@@ -149,22 +149,19 @@ double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되�
 		pid_t wait_pid;
 		int status;
 
-		if(pid[i] > 0)
-		{
-			while((((wait_pid = wait(&status)) == -1) && errno == EINTR));	
-			//느린 시스템콜로 인해 비정상 종료되는 상황을 방지
+		while((((wait_pid = wait(&status)) == -1) && errno == EINTR));	
+		//느린 시스템콜로 인해 비정상 종료되는 상황을 방지
 
-            if(WIFEXITED(status))
-            {
-                result += *((double*)shm_addr+i);
-                printf("Wait() Child END : statue NO%d\n",WEXITSTATUS(status));
-            }
-            else if(WIFSIGNALED(status))
-            {
-                printf("Wait() Child %d ERROR : NO%d\n",i,WTERMSIG(status));
-            }
-        
+		if(WIFEXITED(status))
+		{
+			result += *((double*)shm_addr+i);
+			printf("Wait() Child END : statue NO%d\n",WEXITSTATUS(status));
 		}
+		else if(WIFSIGNALED(status))
+		{
+			printf("Wait() Child %d ERROR : NO%d\n",i,WTERMSIG(status));
+		}
+        
 	}
 
 	free(pid);
