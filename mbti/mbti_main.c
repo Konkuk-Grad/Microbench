@@ -33,10 +33,10 @@ int main(int argc, char *argv[]){
     double measure_time = 0;
     switch(mode){
         case 1: // Signal
-            measure_time = sig_test(topology, pairs, iter, cores);
+            // measure_time = sig_test(topology, pairs, iter, cores);
             break;
         case 2: // IPC
-            measure_time = ipc_test(topology, pairs, iter, cores);
+            // measure_time = ipc_test(topology, pairs, iter, cores);
             // Execute function
             break;
         case 3: // Semaphore
