@@ -9,6 +9,7 @@ typedef void (*func_type)();
 void init_pthread(){
     /* initilization for pthread_mutex & pthread_cond */
     pthread_mutex_init(&pthread_lock, NULL);
+    pthread_mutex_init(&pthread_lock2,NULL);
     pthread_mutex_init(&pthread_condition_lock, NULL);
     pthread_cond_init(&pthread_cond, NULL);
     /* initilization for timespec */
