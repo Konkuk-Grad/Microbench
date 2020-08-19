@@ -1,6 +1,6 @@
 #include "mbti_sem.h"
 
-void make_shm()
+void make_shm()//프로세스간 공유 메모리를 생성한다.
 {    
     if ( -1 == ( shm_id = shmget( (key_t)shm_key, shm_size, IPC_CREAT|0666)))
     {
@@ -116,7 +116,7 @@ double sem_iter_exec(int iter,int num_cpus)//테스트 실행
 	sem_destroy(&sem_mutex);
 	time = (sem_end.tv_sec-sem_begin.tv_sec) * 1000 + (double)(sem_end.tv_nsec-sem_begin.tv_nsec) / 1000000;
 
-	return time;
+	return time/iter;
 }
 
 double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되는 프로세스 수만큼 생성 및 실행
@@ -132,15 +132,15 @@ double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되�
 
 	for (int i = 0 ; i < processes ; i++)
     {
-        pid[i] = fork();
-        if(pid[i] == 0)
-        {
-            make_shm();
-            time = (double*)shm_addr;
-            *(time+i) = sem_iter_exec(iter,num_cpus);
-        }else if(pid[i] < 0)
+        if((pid[i] = fork()) < 0)
         {
             perror("fork error");
+        }else if(pid[i] == 0)
+        {
+			make_shm();
+            time = (double*)shm_addr;
+            *(time+i) = sem_iter_exec(iter,num_cpus);
+			exit(0);
         }
 	}
 
@@ -157,7 +157,7 @@ double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되�
             if(WIFEXITED(status))
             {
                 result += *((double*)shm_addr+i);
-                //printf("Wait() Child END : statue NO%d\n",WEXITSTATUS(status));
+                printf("Wait() Child END : statue NO%d\n",WEXITSTATUS(status));
             }
             else if(WIFSIGNALED(status))
             {
@@ -167,5 +167,7 @@ double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되�
 		}
 	}
 
-    return result;
+	free(pid);
+
+    return result/processes;
 }
