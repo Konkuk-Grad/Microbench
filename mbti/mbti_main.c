@@ -40,7 +40,7 @@ int main(int argc, char *argv[]){
             // Execute function
             break;
         case 3: // Semaphore
-            // Execute function
+            measure_time = sem_make_processes(pairs,iter,cores);
             break;
         case 4: // Mutex
             measure_time = pthread_test(topology, pairs, iter, cores);
