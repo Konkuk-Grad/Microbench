@@ -17,6 +17,7 @@
     extern unsigned int pthread_ready_flag;
     extern long pthread_ncores;
     extern pthread_mutex_t pthread_lock;
+    extern pthread_mutex_t pthread_lock2;
     extern pthread_mutex_t pthread_condition_lock;
     extern pthread_cond_t pthread_cond;
 
