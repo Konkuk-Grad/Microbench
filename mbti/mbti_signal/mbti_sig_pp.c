@@ -5,15 +5,11 @@ void recv_pong(){
     // clock_gettime(CLOCK_MONOTONIC, &end_point); // Individual checking time
     
     if(curr_iter_count++ < user_iter_count){
-#ifdef DEBUGMSG
-        printf("[DEBUG][I] I->O ping_count: %d\n", ping_count); // Send ping
-#endif
+        DEBUGMSG("[I] I->O ping_count: %d\n", recv_ping_count); // Send ping
         kill(pong_pid, SIGUSR1);        
     } else {
         clock_gettime(CLOCK_MONOTONIC, &end_point);
-#ifdef DEBUGMSG
-        printf("[DEBUG][Terminate][I] I->O ping_count: %d\n", --curr_iter_count);
-#endif
+        DEBUGMSG("[Terminate][I] I->O ping_count: %d\n", --curr_iter_count);
         kill(pong_pid, SIGUSR2); // Terminate pong process
     }
 }
@@ -53,10 +49,8 @@ void end_ping(){
         }
     }
 
-#ifdef DEBUGMSG
-    printf("[Total  ] {%f} ms\n", measure_time);
-    printf("[Average] {%f} ms/iter \n", measure_time / user_iter_count);
-#endif
+    DEBUGMSG("[Total  ] {%f} ms\n", measure_time);
+    DEBUGMSG("[Average] {%f} ms/iter \n", measure_time / user_iter_count);
 
     exit(0);
 }
@@ -65,18 +59,14 @@ void end_ping(){
 void recv_ping(){
     if(recv_ping_count++ < user_iter_count){
         kill(ping_pid, SIGUSR1); // SEND PONG
-#ifdef DEBUGMSG
-        printf("[DEBUG][O] O->I recv_ping_count: %d\n", recv_ping_count); // Send pong
-#endif
+        DEBUGMSG("[O] O->I recv_ping_count: %d\n", recv_ping_count); // Send pong
     } else {
         // dummy else
     }
 }
 
 void end_pong(){
-#ifdef DEBUGMSG
-    printf("[DEBUG][endpong][O] recv_ping_count: %d\n", recv_ping_count);
-#endif
+    DEBUGMSG("[endpong][O] recv_ping_count: %d\n", recv_ping_count);
     kill(ping_pid, SIGUSR2);
     exit(0);    
 }
@@ -168,14 +158,9 @@ pid_t* init_pingpong(int pairs, int iter, int num_cpus){
                 }
             }
         } else {
-#ifdef DEBUGMSG
-            printf("pid: %d, fork: %d\n", getpid(), i);
-#endif
+            DEBUGMSG("pid: %d, fork: %d\n", getpid(), i);
         }
     }
 
-#ifdef DEBUGMSG
-    printf("hello world! %d\n", getpid());
-#endif
     return pid_arr;
 }
