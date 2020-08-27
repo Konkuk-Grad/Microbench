@@ -10,8 +10,14 @@ void init_pthread(){
     /* initilization for pthread_mutex & pthread_cond */
     pthread_mutex_init(&pthread_lock, NULL);
     pthread_mutex_init(&pthread_lock2,NULL);
+    pthread_mutex_init(&pthread_glob_lock, NULL);
     pthread_mutex_init(&pthread_condition_lock, NULL);
     pthread_cond_init(&pthread_cond, NULL);
+    
+    pthread_cond_init(&pthread_empty,NULL);
+    pthread_cond_init(&pthread_full,NULL);
+    pthread_cond_init(&pthread_empty2,NULL);
+    pthread_cond_init(&pthread_full2,NULL);
     /* initilization for timespec */
     pthread_start_point = (struct timespec*)malloc(sizeof(struct timespec)* pthread_thread_num);
     pthread_end_point   = (struct timespec*)malloc(sizeof(struct timespec)* pthread_thread_num);
