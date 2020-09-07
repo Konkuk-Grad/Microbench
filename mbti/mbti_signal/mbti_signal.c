@@ -102,7 +102,8 @@ double sig_test_exec(pid_t *trig_pid, int processes, int topology){ // Signal Te
     }
 
     // Wait until all processes are done
-    kill(getpid(), SIGTSTP);
+    // kill(getpid(), SIGTSTP);
+    kill(getpid(), SIGSTOP);
 
     // Send signals to child processes to send messages
     for(int i = 0; i < processes; i++){
