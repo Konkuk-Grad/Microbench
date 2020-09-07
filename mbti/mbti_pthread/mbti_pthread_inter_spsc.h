@@ -1,6 +1,4 @@
 #include <pthread.h>
-
-extern pthread_mutex_t pthread_lock3;
 extern int inuse; 
 
 void* pthread_inter_create_pair(void* arg);

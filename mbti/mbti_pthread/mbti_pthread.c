@@ -1,6 +1,7 @@
 #include "mbti_pthread.h"
 #include "mbti_pthread_spsc.h"
 #include "mbti_pthread_global.h"
+#include "mbti_pthread_inter_spsc.h"
 #include <fcntl.h>
 #include <mqueue.h>
 
@@ -13,11 +14,11 @@ void init_pthread(){
     pthread_mutex_init(&pthread_glob_lock, NULL);
     pthread_mutex_init(&pthread_condition_lock, NULL);
     pthread_cond_init(&pthread_cond, NULL);
-    
     pthread_cond_init(&pthread_empty,NULL);
     pthread_cond_init(&pthread_full,NULL);
     pthread_cond_init(&pthread_empty2,NULL);
     pthread_cond_init(&pthread_full2,NULL);
+
     /* initilization for timespec */
     pthread_start_point = (struct timespec*)malloc(sizeof(struct timespec)* pthread_thread_num);
     pthread_end_point   = (struct timespec*)malloc(sizeof(struct timespec)* pthread_thread_num);
@@ -91,6 +92,9 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
     /* For later use */
     case 2:
         thread_func = pthread_create_pair;
+        break;
+    case 3:
+        thread_func = pthread_inter_create_pair;
         break;
     default:
         thread_func = pthread_global_thread_act;

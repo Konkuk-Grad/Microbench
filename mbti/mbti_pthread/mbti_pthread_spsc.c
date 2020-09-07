@@ -52,10 +52,6 @@ void pthread_spsc_thread_act(){
         perror("[mq_open]");
         exit(0);
     }
-    pthread_cond_init(&pthread_empty,NULL);
-    pthread_cond_init(&pthread_full,NULL);
-    pthread_cond_init(&pthread_empty2,NULL);
-    pthread_cond_init(&pthread_full2,NULL);
     
     if(pthread_create(&thread_id[0], NULL, pthread_pair1,(void*)pthread_try_count) < 0){
         perror("[pthread_spsc_thread_create]");
