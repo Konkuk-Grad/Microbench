@@ -8,6 +8,7 @@ peda-session-*
 result*.txt
 */.vscode/*
 *.csv
+*.png
 *.dat
 CMake*
 build/
