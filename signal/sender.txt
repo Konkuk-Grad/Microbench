@@ -1,0 +1,119 @@
+   signal_pp.out-3256  [001]   120.361226: funcgraph_entry:        0.614 us   |  fpregs_assert_state_consistent();
+   signal_pp.out-3256  [001]   120.361230: funcgraph_entry:                   |  do_syscall_64() {
+   signal_pp.out-3256  [001]   120.361231: funcgraph_entry:                   |    __x64_sys_kill() {
+   signal_pp.out-3256  [001]   120.361232: funcgraph_entry:        2.264 us   |      __task_pid_nr_ns();
+   signal_pp.out-3256  [001]   120.361235: funcgraph_entry:                   |      from_kuid_munged() {
+   signal_pp.out-3256  [001]   120.361235: funcgraph_entry:        0.600 us   |        map_id_up();
+   signal_pp.out-3256  [001]   120.361236: funcgraph_exit:         1.742 us   |      }
+   signal_pp.out-3256  [001]   120.361237: funcgraph_entry:                   |      kill_something_info() {
+   signal_pp.out-3256  [001]   120.361237: funcgraph_entry:        1.264 us   |        find_vpid();
+   signal_pp.out-3256  [001]   120.361239: funcgraph_entry:                   |        kill_pid_info() {
+   signal_pp.out-3256  [001]   120.361240: funcgraph_entry:        0.598 us   |          pid_task();
+   signal_pp.out-3256  [001]   120.361241: funcgraph_entry:                   |          group_send_sig_info() {
+   signal_pp.out-3256  [001]   120.361241: funcgraph_entry:                   |            check_kill_permission() {
+   signal_pp.out-3256  [001]   120.361242: funcgraph_entry:                   |              audit_signal_info() {
+   signal_pp.out-3256  [001]   120.361243: funcgraph_entry:        0.703 us   |                audit_signal_info_syscall();
+   signal_pp.out-3256  [001]   120.361244: funcgraph_exit:         1.935 us   |              }
+   signal_pp.out-3256  [001]   120.361245: funcgraph_entry:                   |              security_task_kill() {
+   signal_pp.out-3256  [001]   120.361245: funcgraph_entry:                   |                apparmor_task_kill() {
+   signal_pp.out-3256  [001]   120.361246: funcgraph_entry:        0.860 us   |                  aa_get_task_label();
+   signal_pp.out-3256  [001]   120.361247: funcgraph_entry:        0.857 us   |                  aa_may_signal();
+   signal_pp.out-3256  [001]   120.361249: funcgraph_exit:         3.404 us   |                }
+   signal_pp.out-3256  [001]   120.361249: funcgraph_exit:         4.769 us   |              }
+   signal_pp.out-3256  [001]   120.361250: funcgraph_exit:         8.643 us   |            }
+   signal_pp.out-3256  [001]   120.361251: funcgraph_entry:                   |            do_send_sig_info() {
+   signal_pp.out-3256  [001]   120.361251: funcgraph_entry:                   |              __lock_task_sighand() {
+   signal_pp.out-3256  [001]   120.361252: funcgraph_entry:        0.786 us   |                _raw_spin_lock_irqsave();
+   signal_pp.out-3256  [001]   120.361253: funcgraph_exit:         1.848 us   |              }
+   signal_pp.out-3256  [001]   120.361254: funcgraph_entry:                   |              send_signal() {
+   signal_pp.out-3256  [001]   120.361254: funcgraph_entry:        0.532 us   |                siginfo_layout();
+   signal_pp.out-3256  [001]   120.361255: funcgraph_entry:        0.610 us   |                task_active_pid_ns();
+   signal_pp.out-3256  [001]   120.361256: funcgraph_entry:        0.617 us   |                __task_pid_nr_ns();
+   signal_pp.out-3256  [001]   120.361257: funcgraph_entry:                   |                __send_signal() {
+   signal_pp.out-3256  [001]   120.361258: funcgraph_entry:        0.778 us   |                  prepare_signal();
+   signal_pp.out-3256  [001]   120.361260: funcgraph_entry:                   |                  __sigqueue_alloc() {
+   signal_pp.out-3256  [001]   120.361260: funcgraph_entry:                   |                    kmem_cache_alloc() {
+   signal_pp.out-3256  [001]   120.361261: funcgraph_entry:        0.505 us   |                      should_failslab();
+   signal_pp.out-3256  [001]   120.361262: funcgraph_entry:        0.648 us   |                      memcg_kmem_put_cache();
+   signal_pp.out-3256  [001]   120.361263: funcgraph_exit:         3.103 us   |                    }
+   signal_pp.out-3256  [001]   120.361264: funcgraph_exit:         4.309 us   |                  }
+   signal_pp.out-3256  [001]   120.361265: funcgraph_entry:                   |                  complete_signal() {
+   signal_pp.out-3256  [001]   120.361265: funcgraph_entry:                   |                    signal_wake_up_state() {
+   signal_pp.out-3256  [001]   120.361266: funcgraph_entry:                   |                      wake_up_state() {
+   signal_pp.out-3256  [001]   120.361266: funcgraph_entry:                   |                        try_to_wake_up() {
+   signal_pp.out-3256  [001]   120.361267: funcgraph_entry:        0.602 us   |                          _raw_spin_lock_irqsave();
+   signal_pp.out-3256  [001]   120.361268: funcgraph_entry:                   |                          select_task_rq_fair() {
+   signal_pp.out-3256  [001]   120.361269: funcgraph_entry:                   |                            select_idle_sibling() {
+   signal_pp.out-3256  [001]   120.361270: funcgraph_entry:        0.546 us   |                              available_idle_cpu();
+   signal_pp.out-3256  [001]   120.361271: funcgraph_entry:                   |                              select_idle_sibling.part.0() {
+   signal_pp.out-3256  [001]   120.361272: funcgraph_entry:        0.517 us   |                                available_idle_cpu();
+   signal_pp.out-3256  [001]   120.361273: funcgraph_entry:        0.594 us   |                                available_idle_cpu();
+   signal_pp.out-3256  [001]   120.361274: funcgraph_entry:        0.561 us   |                                available_idle_cpu();
+   signal_pp.out-3256  [001]   120.361275: funcgraph_entry:        0.537 us   |                                available_idle_cpu();
+   signal_pp.out-3256  [001]   120.361276: funcgraph_exit:         5.721 us   |                              }
+   signal_pp.out-3256  [001]   120.361277: funcgraph_exit:         7.833 us   |                            }
+   signal_pp.out-3256  [001]   120.361277: funcgraph_exit:         9.033 us   |                          }
+   signal_pp.out-3256  [001]   120.361278: funcgraph_entry:                   |                          set_task_cpu() {
+   signal_pp.out-3256  [001]   120.361279: funcgraph_entry:                   |                            migrate_task_rq_fair() {
+   signal_pp.out-3256  [001]   120.361280: funcgraph_entry:                   |                              remove_entity_load_avg() {
+   signal_pp.out-3256  [001]   120.361280: funcgraph_entry:                   |                                __update_load_avg_blocked_se() {
+   signal_pp.out-3256  [001]   120.361281: funcgraph_entry:        0.542 us   |                                  __accumulate_pelt_segments();
+   signal_pp.out-3256  [001]   120.361282: funcgraph_exit:         1.743 us   |                                }
+   signal_pp.out-3256  [001]   120.361282: funcgraph_entry:        0.520 us   |                                _raw_spin_lock_irqsave();
+   signal_pp.out-3256  [001]   120.361283: funcgraph_entry:        0.541 us   |                                __lock_text_start();
+   signal_pp.out-3256  [001]   120.361284: funcgraph_exit:         4.982 us   |                              }
+   signal_pp.out-3256  [001]   120.361285: funcgraph_exit:         6.020 us   |                            }
+   signal_pp.out-3256  [001]   120.361286: funcgraph_entry:        0.728 us   |                            set_task_rq_fair();
+   signal_pp.out-3256  [001]   120.361287: funcgraph_exit:         8.656 us   |                          }
+   signal_pp.out-3256  [001]   120.361287: funcgraph_entry:        0.517 us   |                          _raw_spin_lock();
+   signal_pp.out-3256  [001]   120.361288: funcgraph_entry:        0.575 us   |                          update_rq_clock();
+   signal_pp.out-3256  [001]   120.361290: funcgraph_entry:                   |                          ttwu_do_activate() {
+   signal_pp.out-3256  [001]   120.361290: funcgraph_entry:                   |                            activate_task() {
+   signal_pp.out-3256  [001]   120.361291: funcgraph_entry:                   |                              psi_task_change() {
+   signal_pp.out-3256  [001]   120.361292: funcgraph_entry:        1.034 us   |                                record_times();
+   signal_pp.out-3256  [001]   120.361293: funcgraph_entry:        0.838 us   |                                record_times();
+   signal_pp.out-3256  [001]   120.361295: funcgraph_entry:        0.796 us   |                                record_times();
+   signal_pp.out-3256  [001]   120.361296: funcgraph_entry:        0.530 us   |                                record_times();
+   signal_pp.out-3256  [001]   120.361297: funcgraph_exit:         6.351 us   |                              }
+   signal_pp.out-3256  [001]   120.361298: funcgraph_entry:                   |                              enqueue_task_fair() {
+   signal_pp.out-3256  [001]   120.361298: funcgraph_entry:                   |                                enqueue_entity() {
+   signal_pp.out-3256  [001]   120.361299: funcgraph_entry:        0.527 us   |                                  update_curr();
+   signal_pp.out-3256  [001]   120.361300: funcgraph_entry:                   |                                  __update_load_avg_cfs_rq() {
+   signal_pp.out-3256  [001]   120.361300: funcgraph_entry:        0.568 us   |                                    __accumulate_pelt_segments();
+   signal_pp.out-3256  [001]   120.361302: funcgraph_exit:         1.835 us   |                                  }
+   signal_pp.out-3256  [001]   120.361302: funcgraph_entry:        0.632 us   |                                  attach_entity_load_avg();
+   signal_pp.out-3256  [001]   120.361303: funcgraph_entry:        0.549 us   |                                  update_cfs_group();
+   signal_pp.out-3256  [001]   120.361305: funcgraph_entry:        0.610 us   |                                  account_entity_enqueue();
+   signal_pp.out-3256  [001]   120.361306: funcgraph_entry:        1.149 us   |                                  place_entity();
+   signal_pp.out-3256  [001]   120.361307: funcgraph_entry:        0.661 us   |                                  __enqueue_entity();
+   signal_pp.out-3256  [001]   120.361309: funcgraph_exit:       + 10.393 us  |                                }
+   signal_pp.out-3256  [001]   120.361309: funcgraph_entry:                   |                                enqueue_entity() {
+   signal_pp.out-3256  [001]   120.361310: funcgraph_entry:        0.526 us   |                                  update_curr();
+   signal_pp.out-3256  [001]   120.361311: funcgraph_entry:                   |                                  __update_load_avg_se() {
+   signal_pp.out-3256  [001]   120.361311: funcgraph_entry:        0.519 us   |                                    __accumulate_pelt_segments();
+   signal_pp.out-3256  [001]   120.361312: funcgraph_exit:         1.744 us   |                                  }
+   signal_pp.out-3256  [001]   120.361313: funcgraph_entry:                   |                                  __update_load_avg_cfs_rq() {
+   signal_pp.out-3256  [001]   120.361313: funcgraph_entry:        0.517 us   |                                    __accumulate_pelt_segments();
+   signal_pp.out-3256  [001]   120.361315: funcgraph_exit:         1.620 us   |                                  }
+   signal_pp.out-3256  [001]   120.361315: funcgraph_entry:                   |                                  update_cfs_group() {
+   signal_pp.out-3256  [001]   120.361316: funcgraph_entry:        0.589 us   |                                    reweight_entity();
+   signal_pp.out-3256  [001]   120.361317: funcgraph_exit:         1.731 us   |                                  }
+   signal_pp.out-3256  [001]   120.361318: funcgraph_entry:        0.558 us   |                                  account_entity_enqueue();
+   signal_pp.out-3256  [001]   120.361319: funcgraph_entry:        0.488 us   |                                  place_entity();
+   signal_pp.out-3256  [001]   120.361320: funcgraph_entry:        0.532 us   |                                  __enqueue_entity();
+   signal_pp.out-3256  [001]   120.361321: funcgraph_exit:       + 11.697 us  |                                }
+   signal_pp.out-3256  [001]   120.361321: funcgraph_entry:        0.514 us   |                                hrtick_update();
+   signal_pp.out-3256  [001]   120.361322: funcgraph_exit:       + 24.795 us  |                              }
+   signal_pp.out-3256  [001]   120.361323: funcgraph_exit:       + 32.920 us  |                            }
+   signal_pp.out-3256  [001]   120.361323: funcgraph_entry:                   |                            ttwu_do_wakeup() {
+   signal_pp.out-3256  [001]   120.361324: funcgraph_entry:                   |                              check_preempt_curr() {
+   signal_pp.out-3256  [001]   120.361325: funcgraph_entry:        0.657 us   |                                resched_curr();
+   signal_pp.out-3256  [001]   120.361326: funcgraph_exit:         1.864 us   |                              }
+   signal_pp.out-3256  [001]   120.361327: funcgraph_exit:         3.917 us   |                            }
+   signal_pp.out-3256  [001]   120.361328: funcgraph_exit:       + 38.368 us  |                          }
+   signal_pp.out-3256  [001]   120.361328: funcgraph_entry:        0.531 us   |                          __lock_text_start();
+   signal_pp.out-3256  [001]   120.361329: funcgraph_exit:       + 63.154 us  |                        }
+   signal_pp.out-3256  [001]   120.361330: funcgraph_exit:       + 64.180 us  |                      }
+   signal_pp.out-3256  [001]   120.361331: funcgraph_exit:       + 65.212 us  |                    }
+   signal_pp.out-3256  [001]   120.361331: funcgraph_exit:       + 66.568 us  |                  }
+   signal_pp.out-3256  [001]   120.361333: signal_generate:      sig=10 errno=0 code=0 comm=signal_pp.out pid=3257 grp=1 res=0
