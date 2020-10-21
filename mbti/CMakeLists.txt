@@ -15,7 +15,7 @@ aux_source_directory(mbti_pthread PTHREAD_SRC)
 # USER_EXEC이 활성화 되지 않을 경우 특정 Signal이 Triggering 되지 않을 때 까지 대기합니다.
 # add_definitions(-D__DEBUGMSG -DUSER_EXEC)
 
-add_definitions(-DUSER_EXEC)
+add_definitions(-DUSER_EXEC -D__DEBUGMSG)
 
 add_executable(mbti.out mbti_main.c ${SIGNAL_SRC} ${SEM_SRC} ${IPC_SRC} ${PTHREAD_SRC})
 
