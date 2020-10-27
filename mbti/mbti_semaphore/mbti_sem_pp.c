@@ -1,15 +1,11 @@
 #include "mbti_sem.h"
 
-void sem_put_item(){
-	char item = 0;
-    sem_rear = (sem_rear + 1) % 1;
-	sem_buffer[sem_rear] = item;
+void sem_put_item(char local){
+    sem_buffer = local;
 }
 
-void sem_consume_item(){
-	char item;
-	item = sem_buffer[sem_front];
-	sem_front = (sem_front + 1) % 1;
+void sem_consume_item(char* local){
+	*local = sem_buffer;
 }
 
 void make_shm()//프로세스간 공유 메모리를 생성한다.
@@ -48,16 +44,17 @@ void sem_set_core_affinities(int num_cpus)//코어설정 함수
 void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세마포어를 이용하여 값을 생산하고 버퍼에 추가한다.
 {
 	int num_cpus = *((int*)arg);
+	char sem_local = 0;
 	sem_set_core_affinities(num_cpus);
     clock_gettime(CLOCK_MONOTONIC,&sem_begin);
 	//생산자가 공유 버퍼에 값을 집어 넣으면서 시작.
 	for(int i=0;i<sem_user_iter;i++)
     {
 		sem_wait(&sem_full1);
-		sem_put_item();
+		sem_put_item(sem_local);
 		sem_post(&sem_full2);
 		sem_wait(&sem_full1);
-		sem_consume_item();
+		sem_consume_item(sem_local);
 		sem_post(&sem_full1);
 	}
 	clock_gettime(CLOCK_MONOTONIC,&sem_end);
@@ -68,12 +65,13 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 void* sem_consumer(void* arg)//소비자 쓰레드, 3가지 세마포어를 사용하여 버퍼에 있는 아이템을 가져온다.
 {
 	int num_cpus = *((int*)arg);
+	char sem_local = 0;
 	sem_set_core_affinities(num_cpus);
     for(int i=0;i<sem_user_iter;i++) 
     {
 		sem_wait(&sem_full2);
-		sem_consume_item();
-		sem_put_item();
+		sem_consume_item(sem_local);
+		sem_put_item(sem_local);
 		sem_post(&sem_full1);
 	}
 	return 0;

@@ -30,7 +30,7 @@ struct timespec sem_begin, sem_end;
 //시간 표시를 위한 시작 시각, 마치는 시각
 void* shm_addr;
 //공유 메모리 주소
-char sem_buffer[1024];//PingPong 상황에서 사용되는 큐형태의 버퍼
+char sem_buffer;//PingPong 상황에서 사용되는 char형 변수
 
 /* ------- */
 /* Defines */
