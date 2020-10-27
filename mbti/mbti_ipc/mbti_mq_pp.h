@@ -12,7 +12,7 @@
 
 #define MQ_PP_NAME "/mq_pp"
 #define MQ_MAX_MSG 10 // Count
-#define MQ_MSG_SIZE 4 // Byte
+#define MQ_MSG_SIZE 1 // Byte
 #define MQ_PP_MAX_MSG 1025 // Count
 #define MQ_PP_MSG_SIZE 8 // Byte
 #define SHM_KEY_NUM 9527

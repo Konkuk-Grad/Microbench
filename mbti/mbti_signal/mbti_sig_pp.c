@@ -5,11 +5,11 @@ void recv_pong(){
     // clock_gettime(CLOCK_MONOTONIC, &end_point); // Individual checking time
     
     if(curr_iter_count++ < user_iter_count){
-        DEBUGMSG("[I] I->O ping_count: %d\n", recv_ping_count); // Send ping
+        PRINTLOG("[I] I->O ping_count: %d\n", recv_ping_count); // Send ping
         kill(pong_pid, SIGUSR1);        
     } else {
         clock_gettime(CLOCK_MONOTONIC, &end_point);
-        DEBUGMSG("[Terminate][I] I->O ping_count: %d\n", --curr_iter_count);
+        PRINTLOG("[Terminate][I] I->O ping_count: %d\n", --curr_iter_count);
         kill(pong_pid, SIGUSR2); // Terminate pong process
     }
 }
@@ -59,14 +59,14 @@ void end_ping(){
 void recv_ping(){
     if(recv_ping_count++ < user_iter_count){
         kill(ping_pid, SIGUSR1); // SEND PONG
-        DEBUGMSG("[O] O->I recv_ping_count: %d\n", recv_ping_count); // Send pong
+        PRINTLOG("[O] O->I recv_ping_count: %d\n", recv_ping_count); // Send pong
     } else {
         // dummy else
     }
 }
 
 void end_pong(){
-    DEBUGMSG("[endpong][O] recv_ping_count: %d\n", recv_ping_count);
+    PRINTWARN("[endpong][O] recv_ping_count: %d\n", recv_ping_count);
     kill(ping_pid, SIGUSR2);
     exit(0);    
 }

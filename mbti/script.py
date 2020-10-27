@@ -17,6 +17,7 @@ run_file_name = "./mbti.out"
 # Global variables
 mode_list = {1: "Signal", 2: "IPC", 3: "Lock"}
 topology_list = {1: "Ping-pong"}
+lock_list = {1: "Semaphore", 2: "Mutex"}
 graph_list = {1: "Per cores", 2: "Per processes"}
 process_list = []
 
@@ -55,6 +56,23 @@ def select_topology():
     else:
         return topology
     
+def select_lock_mode():
+    print("Select Lock mode\n")
+    for key in lock_list:
+        print("{0}: {1}".format(key, lock_list[key]))
+    print("0. exit\n")
+
+    lock = int(input("Lock: "))
+
+    if lock == 0:
+        print("Terminate program")
+        sys.exit(0)
+    elif not lock in lock_list:
+        print("Not found lock [{0}]\n".format(lock))
+        return -1
+    else:
+        return lock
+
 
 def input_value():
     '''
@@ -92,8 +110,9 @@ def input_value():
             if attr[3] <= 0:
                 attr[3] = int(input(attr_name[3] + ": "))
             
+            # 4: Variations of graphs
             if attr[4] <= 0:
-                attr[4] = int(input(attr_name[4] + ": "))
+                attr[4] = int(input(attr_name[4] + " (" + ", ".join(["{0}: {1}".format(key, graph_list[key]) for key in graph_list]) + "): "))
                 if not attr[4] in graph_list.keys():
                     attr[4] = -1
             
@@ -125,6 +144,7 @@ def exec_single_test(attr):
     exec_attr = [attr[6], attr[7], attr[1], attr[2], attr[0]]
     exec_time = []
     for i in range(attr[3]):
+        print("[{5}] mode: {0}, topology: {1}, NoP: {2}, NoI: {3}, NoC:{4}".format(exec_attr[0], exec_attr[1], exec_attr[2], exec_attr[3], exec_attr[4], i))
         p = process([run_file_name] + [str(i) for i in exec_attr])
         p.recvuntil("{")
         exec_time.append(float(p.recvuntil("}")[:-1]))
@@ -141,14 +161,25 @@ def exec_whole_tests(attr):
     4. Variations of graphs
     5. Gaps
     6. mode
-    7. topology
+    7. lock
+    8. topology
     '''
     test_attr = copy.deepcopy(attr)
     result_list = []
     result_avg_list = []
-    x_axis=[i for i in range(1, attr[1] + 1, attr[5])]
-    for i in range(1, attr[1] + 1, attr[5]):
-        test_attr[1] = i
+    
+    y_axis = 0
+    if(attr[4] == 1): # Per cores
+        y_axis = 0
+    elif (attr[4] == 2): # Per processes
+        y_axis = 1
+    else:
+        print("Invalid Graphs: ", attr[4])
+    
+    x_axis=[i for i in range(1, attr[y_axis] + 1, attr[5])]
+
+    for i in range(1, attr[y_axis] + 1, attr[5]):
+        test_attr[y_axis] = i
         result_list.append(exec_single_test(test_attr))
         
     for i in range(len(result_list)):
@@ -186,14 +217,22 @@ def print_graph(filename):
 # Menu
 def init_menu():
     mode = -1
+    lock = 0
     topology = -1
-    while mode <= 0 or topology <= 0:
+    while mode <= 0 or lock <= 0 or topology <= 0:
         mode = select_mode() if mode <= 0 else mode    
         if mode <= 0:
             continue
-
+        elif mode == 3: # Lock
+            lock = select_lock_mode()
+            if lock <= 0:
+                continue
+            else:
+                mode += lock - 1 if lock > 0 else lock
+        elif mode <= 2:
+            lock = 1
         topology = select_topology() if topology <= 0 else topology
-    
+
     attr = input_value() + [mode, topology]
     return exec_whole_tests(attr)
 
@@ -207,6 +246,3 @@ if __name__ == "__main__":
 
     # filename = "202097152945.csv"
     # print_graph(filename)
-
-    
-    
