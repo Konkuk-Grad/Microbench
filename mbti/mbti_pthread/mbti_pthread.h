@@ -18,8 +18,15 @@
     extern long pthread_ncores;
     extern pthread_mutex_t pthread_lock;
     extern pthread_mutex_t pthread_lock2;
+    extern pthread_mutex_t pthread_glob_lock;
     extern pthread_mutex_t pthread_condition_lock;
     extern pthread_cond_t pthread_cond;
+
+//for SPSC
+    extern pthread_cond_t pthread_empty;
+    extern pthread_cond_t pthread_full;
+    extern pthread_cond_t pthread_empty2;
+    extern pthread_cond_t pthread_full2;
 
     double pthread_test(int topology, int processes, int iter, int num_cpus);
     void init_pthread();
