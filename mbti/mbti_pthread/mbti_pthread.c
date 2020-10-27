@@ -93,9 +93,9 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
     case 2:
         thread_func = pthread_create_pair;
         break;
-    case 3:
-        thread_func = pthread_inter_create_pair;
-        break;
+    // case 3:
+        // thread_func = pthread_inter_create_pair;
+        // break;
     default:
         thread_func = pthread_global_thread_act;
         break;

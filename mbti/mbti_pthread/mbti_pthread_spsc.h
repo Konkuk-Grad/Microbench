@@ -4,7 +4,8 @@ struct pthread_msg{
     struct timespec start_point;
     struct timespec end_point;
 };
-extern char pthread_buf[256];
+// extern char pthread_buf[256];
+extern char pthread_buf;
 extern int pthread_count, pthread_count2;
 extern struct pthread_msg p_msg;
 void pthread_create_pair();

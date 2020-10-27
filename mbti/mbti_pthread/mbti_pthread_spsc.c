@@ -70,6 +70,7 @@ void pthread_spsc_thread_act(){
 
 void* pthread_pair1(void* arg){
     int iter = (int)arg;
+    char local = 1;
     pthread_setaffinity();
     clock_gettime(CLOCK_MONOTONIC, &p_msg.start_point);
     for(int i = 0; i < iter; i++){
@@ -78,7 +79,8 @@ void* pthread_pair1(void* arg){
         while(pthread_count == 1){
             pthread_cond_wait(&pthread_full,&pthread_lock);
         }
-        strncpy(pthread_buf, "Hello pair2!", 12);
+        pthread_buf = local;
+        // strncpy(pthread_buf, "Hello pair2!", 12);
         pthread_count = 1;
         pthread_cond_signal(&pthread_empty);
         pthread_mutex_unlock(&pthread_lock);
@@ -87,8 +89,9 @@ void* pthread_pair1(void* arg){
         while(pthread_count2 == 0){
             pthread_cond_wait(&pthread_empty2,&pthread_lock2);
         }
-        fprintf(stderr,"[%s] from pair2\n", pthread_buf);
-        memset(pthread_buf,0,256);
+        // fprintf(stderr,"[%s] from pair2\n", pthread_buf);
+        // memset(pthread_buf,0,256);
+        local = pthread_buf;
         pthread_count2 = 0;
         pthread_cond_signal(&pthread_full2);
         pthread_mutex_unlock(&pthread_lock2);
@@ -98,6 +101,7 @@ void* pthread_pair1(void* arg){
 
 void* pthread_pair2(void* arg){
     int iter = (int)arg;
+    char local = 0;
     pthread_setaffinity();
     for(int i = 0; i < iter; i++){
         //consume
@@ -105,8 +109,10 @@ void* pthread_pair2(void* arg){
         while(pthread_count == 0){
             pthread_cond_wait(&pthread_empty,&pthread_lock);
         }
-        fprintf(stderr,"[%s] from pair1\n", pthread_buf);
-        memset(pthread_buf,0,256);
+        // fprintf(stderr,"[%s] from pair1\n", pthread_buf);
+        // memset(pthread_buf,0,256);
+        // pthread_buf = 0;
+        local = pthread_buf;
         pthread_count = 0;
         pthread_cond_signal(&pthread_full);
         pthread_mutex_unlock(&pthread_lock);
@@ -117,7 +123,8 @@ void* pthread_pair2(void* arg){
         while(pthread_count2 == 1){
             pthread_cond_wait(&pthread_full2,&pthread_lock2);
         }
-        strncpy(pthread_buf, "Hello pair1!", 12);
+        // strncpy(pthread_buf, "Hello pair1!", 12);
+        pthread_buf = local;
         pthread_count2 = 1;
         pthread_cond_signal(&pthread_empty2);
         pthread_mutex_unlock(&pthread_lock2);
