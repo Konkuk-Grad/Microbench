@@ -1,5 +1,18 @@
 #include "mbti_sem.h"
 
+char put_item(){
+	char item = 0;
+    sem_rear = (sem_rear + 1) % 1;
+	sem_buffer[sem_rear] = item;
+}
+
+char consum_item(){
+	char item;
+	item = sem_buffer[sem_front];
+	sem_front = (sem_front + 1) % 1;
+	return item;
+}
+
 void make_shm()//프로세스간 공유 메모리를 생성한다.
 {    
     if ( -1 == ( shm_id = shmget( (key_t)shm_key, shm_size, IPC_CREAT|0666)))
@@ -41,7 +54,13 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 	//생산자가 공유 버퍼에 값을 집어 넣으면서 시작.
 	for(int i=0;i<sem_user_iter;i++)
     {
+		sem_wait(&sem_mutex);
+		sem_put_item();
+		sem_post(&sem_mutex);
 		sem_post(&sem_full1);
+		sem_wait(&sem_mutex);
+		sem_consume_item();
+		sem_post(&sem_mutex);
 		sem_wait(&sem_full2);
 	}
 	clock_gettime(CLOCK_MONOTONIC,&sem_end);
@@ -56,6 +75,12 @@ void* sem_consumer(void* arg)//소비자 쓰레드, 3가지 세마포어를 사�
     for(int i=0;i<sem_user_iter;i++) 
     {
 		sem_wait(&sem_full1);
+		sem_wait(&sem_mutex);
+		sem_consume_item();
+		sem_post(&sem_mutex);
+		sem_wait(&sem_mutex);
+		sem_put_item();
+		sem_post(&sem_mutex);
 		sem_post(&sem_full2);
 	}
 	return 0;
@@ -69,7 +94,7 @@ double sem_iter_exec(int iter,int num_cpus)//테스트 실행
 
 	sem_user_iter = iter;
 
-if((sem_init(&sem_full1,0,1))!=0)
+	if((sem_init(&sem_full1,0,1))!=0)
 	{
 		printf("sem_init_full1 Error\n");
 		return -1;
@@ -77,6 +102,11 @@ if((sem_init(&sem_full1,0,1))!=0)
 	if((sem_init(&sem_full2,0,1))!=0)
 	{
 		printf("sem_init_full2 Error\n");
+		return -1;
+	}
+	if((sem_init(&sem_mutex,0,1))!=0)
+	{
+		printf("sem_init_mutex Error\n");
 		return -1;
 	}
 
@@ -88,6 +118,7 @@ if((sem_init(&sem_full1,0,1))!=0)
 
 	sem_destroy(&sem_full1);
 	sem_destroy(&sem_full2);
+	sem_destroy(&sem_mutex);
 	time = (sem_end.tv_sec-sem_begin.tv_sec) * 1000 + (double)(sem_end.tv_nsec-sem_begin.tv_nsec) / 1000000;
 
 	return time;
