@@ -20,7 +20,7 @@
 /* ---------------- */
 /* Global Variables */
 /* ---------------- */
-static sem_t sem_full1, sem_full2, sem_mutex;
+static sem_t sem_full1, sem_full2;
 //버퍼가 비었는지, 찼는지, 버퍼에 접근 가능한지에 대한 semaphore변수
 int sem_front, sem_rear,shm_id;
 //scsp 상황에서 공유되는 버퍼, 버퍼의 앞 과 뒤를 가르키는 변수, 공유메모리 id
@@ -41,8 +41,8 @@ char sem_buffer[1024];//PingPong 상황에서 사용되는 큐형태의 버퍼
 /* --------- */
 /* Functions */
 /* --------- */
-char sem_put_item();
-char sem_consume_item();
+void sem_put_item();
+void sem_consume_item();
 void* sem_producer(void* arg);
 void* sem_consumer(void* arg);
 double sem_iter_exec(int iter,int num_cpus);
