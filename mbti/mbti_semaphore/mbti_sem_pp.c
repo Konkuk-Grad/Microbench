@@ -54,7 +54,7 @@ void* sem_producer(void* arg)//생산자 쓰레드실행 함수, 3가지의 세�
 		sem_put_item(sem_local);
 		sem_post(&sem_full2);
 		sem_wait(&sem_full1);
-		sem_consume_item(sem_local);
+		sem_consume_item(&sem_local);
 		sem_post(&sem_full1);
 	}
 	clock_gettime(CLOCK_MONOTONIC,&sem_end);
@@ -70,7 +70,7 @@ void* sem_consumer(void* arg)//소비자 쓰레드, 3가지 세마포어를 사�
     for(int i=0;i<sem_user_iter;i++) 
     {
 		sem_wait(&sem_full2);
-		sem_consume_item(sem_local);
+		sem_consume_item(&sem_local);
 		sem_put_item(sem_local);
 		sem_post(&sem_full1);
 	}
@@ -145,11 +145,11 @@ double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되�
 		if(WIFEXITED(status))
 		{
 			result += *((double*)shm_addr+i);
-			printf("Wait() Child END : statue NO%d\n",WEXITSTATUS(status));
+			PRINTERROR("Wait() Child END : statue NO%d\n",WEXITSTATUS(status));
 		}
 		else if(WIFSIGNALED(status))
 		{
-			printf("Wait() Child %d ERROR : NO%d\n",i,WTERMSIG(status));
+			PRINTERROR("Wait() Child %d ERROR : NO%d\n",i,WTERMSIG(status));
 		}
         
 	}

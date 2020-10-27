@@ -41,8 +41,8 @@ char sem_buffer;//PingPong 상황에서 사용되는 char형 변수
 /* --------- */
 /* Functions */
 /* --------- */
-void sem_put_item();
-void sem_consume_item();
+void sem_put_item(char local);
+void sem_consume_item(char* local);
 void* sem_producer(void* arg);
 void* sem_consumer(void* arg);
 double sem_iter_exec(int iter,int num_cpus);
