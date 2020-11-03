@@ -35,10 +35,8 @@ __FILE__, __LINE__, __func__, ##args)
 #endif
 
 #ifdef __ESSENTIAL
-#define PRINTERROR(fmt, args...) fprintf(stderr, ANSI_COLOR_RED"[ERROR]"ANSI_COLOR_CYAN"{%s:%d:%s()}: "ANSI_COLOR_RESET fmt, \
-__FILE__, __LINE__, __func__, ##args)
-#define PRINTRESULT(fmt, args...) fprintf(stdout, ANSI_COLOR_GREEN"[RESULT]"ANSI_COLOR_CYAN"{%s:%d:%s()}: "ANSI_COLOR_RESET fmt, \
-__FILE__, __LINE__, __func__, ##args)
+#define PRINTERROR(fmt, args...) fprintf(stderr, ANSI_COLOR_RED"[ERROR] %s: "ANSI_COLOR_RESET fmt, __func__, ##args)
+#define PRINTRESULT(fmt, args...) fprintf(stdout, ANSI_COLOR_GREEN"[RESULT] %s: "ANSI_COLOR_RESET fmt, __func__, ##args)
 
 #else
 #define PRINTERROR(fmt, args...)
