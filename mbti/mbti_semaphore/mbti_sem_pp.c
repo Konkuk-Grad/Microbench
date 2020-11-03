@@ -2,22 +2,24 @@
 
 void sem_put_item(char local){
     sem_buffer = local;
+	DEBUGMSG("sem_put_item is called\n");
 }
 
 void sem_consume_item(char* local){
 	*local = sem_buffer;
+	DEBUGMSG("sem_consume_item is called\n");
 }
 
 void make_shm()//프로세스간 공유 메모리를 생성한다.
 {    
     if ( -1 == ( shm_id = shmget( (key_t)shm_key, shm_size, IPC_CREAT|0666)))
     {
-        perror("SHMGET ERROR");
+        PRINTERROR("SHMGET ERROR");
     }
 
     if ( ( void *)-1 == ( shm_addr = shmat( shm_id, ( void *)0, 0)))
     {
-        perror("SHMAT ERROR");
+        PRINTERROR("SHMAT ERROR");
     }
 }
 
@@ -31,12 +33,13 @@ void sem_set_core_affinities(int num_cpus)//코어설정 함수
     for (int j = 0; j < num_cpus; j++)
     {
 		CPU_SET(j, &cpuset);//0~core의 수만큼 활성화되도록 set에 추가
+		DEBUGMSG("CPU_SET %d is added at cpuset\n", j);
 	}   
 	
 	result = pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
     if(result != 0)//쓰레드 별로 할당 되지 않았다면 오류 출력
 	{
-        printf("pid [%d] pthread_setaffinity_np failed!\n", getpid());
+        PRINTERROR("pid [%d] pthread_setaffinity_np failed!\n", getpid());
     }
 
 }
@@ -87,25 +90,32 @@ double sem_iter_exec(int iter,int num_cpus)//테스트 실행
 
 	if((sem_init(&sem_full1,0,1))!=0)
 	{
-		printf("sem_init_full1 Error\n");
+		PRINTERROR("sem_init_full1 Error\n");
 		return -1;
 	}
 	if((sem_init(&sem_full2,0,0))!=0)
 	{
-		printf("sem_init_full2 Error\n");
+		PRINTERROR("sem_init_full2 Error\n");
 		return -1;
 	}
 
-	pthread_create(&thread1, NULL, sem_consumer, (void *)&num_cpus);
-	pthread_create(&thread2, NULL, sem_producer, (void *)&num_cpus);
-	pthread_join(thread1, NULL);
-	pthread_join(thread2, NULL);
+	if((pthread_create(&thread1, NULL, sem_consumer, (void *)&num_cpus))!=0)
+		PRINTERROR("pthread_create thread1 is error\n");
+	if((pthread_create(&thread2, NULL, sem_producer, (void *)&num_cpus))!=0)
+		PRINTERROR("pthread_create thread2 is error\n");
+	if((pthread_join(thread1, NULL))!=0)
+		PRINTERROR("pthread_join thread1 is error\n");
+	if((pthread_join(thread2, NULL))!=0)
+		PRINTERROR("pthread_join thread2 is error\n");
+	if((sem_destroy(&sem_full1))==-1)
+		PRINTERROR("sem_full1 is not destroyed\n");
+	if((sem_destroy(&sem_full2))==-1)
+		PRINTERROR("sem_full2 is not destroyed\n");
 
-	sem_destroy(&sem_full1);
-	sem_destroy(&sem_full2);
 
 	time = (sem_end.tv_sec-sem_begin.tv_sec) * 1000 + (double)(sem_end.tv_nsec-sem_begin.tv_nsec) / 1000000;
-
+	if(time==0)
+		PRINTERROR("time is null by sem_iter_exec\n");
 	return time;
 }
 
@@ -114,25 +124,34 @@ double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되�
 	pid_t* pid;
 	pid = (pid_t*)malloc(sizeof(pid)*processes);
 	if(pid == NULL)
-		perror("malloc ERROR");
+		PRINTERROR("malloc ERROR");
 
-    double *time;
-    double result;
+    double *time, result;
+	int count = 0;//생성된 프로세스의 수를 세는 카운터
     make_shm();
 
 	for (int i = 0 ; i < processes ; i++)
     {
         if((pid[i] = fork()) < 0)
         {
-            perror("fork error");
+            PRINTERROR("fork error");
 			return -1;
         }else if(pid[i] == 0)
         {
             time = (double*)shm_addr;
             *(time+i) = sem_iter_exec(iter,num_cpus);
+			if((*(time+i))==0)
+				PRINTERROR("sem_iter_exec no.%d is not perfomed\n",i+1);
 			exit(0);
-        }
+        }else
+		{
+			count++;
+		}
+		
 	}
+
+	if(count!=processes)
+		PRINTERROR("processes are not createad! They must be created %d more\n",(processes-count));
 
 	for(int i=0;i<processes;i++)
 	{
@@ -145,7 +164,7 @@ double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되�
 		if(WIFEXITED(status))
 		{
 			result += *((double*)shm_addr+i);
-			PRINTERROR("Wait() Child END : statue NO%d\n",WEXITSTATUS(status));
+			DEBUGMSG("Wait() Child %d END : statue NO%d\n",i+1,WEXITSTATUS(status));
 		}
 		else if(WIFSIGNALED(status))
 		{
@@ -155,6 +174,8 @@ double sem_make_processes(int processes, int iter,int num_cpus)//테스트 되�
 	}
 
 	free(pid);
-
-    return result/processes;
+	result = result/processes;
+	if(result==0)
+		PRINTERROR("total result value error\n");
+    return result;
 }
