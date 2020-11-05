@@ -22,12 +22,12 @@
 #define ANSI_COLOR_RESET "\x1b[0m" 
 
 #ifdef __DEBUGMSG
-#define DEBUGMSG(fmt, args...) fprintf(stderr, ANSI_COLOR_YELLOW"[DEBUGMSG]"ANSI_COLOR_CYAN"{%s:%d:%s()}: "ANSI_COLOR_RESET fmt, \
-__FILE__, __LINE__, __func__, ##args)
-#define PRINTWARN(fmt, args...) fprintf(stdout, ANSI_COLOR_YELLOW"[WARN]"ANSI_COLOR_CYAN"{%s:%d:%s()}: "ANSI_COLOR_RESET fmt, \
-__FILE__, __LINE__, __func__, ##args)
-#define PRINTLOG(fmt, args...) fprintf(stdout, ANSI_COLOR_BLUE"[LOG]"ANSI_COLOR_CYAN"{%s:%d:%s()}: "ANSI_COLOR_RESET fmt, \
-__FILE__, __LINE__, __func__, ##args)
+#define DEBUGMSG(fmt, args...) fprintf(stderr, ANSI_COLOR_MAGENTA"[DEBUGMSG]"ANSI_COLOR_CYAN"{%s():%d}: "ANSI_COLOR_RESET fmt, \
+__func__, __LINE__, ##args)
+#define PRINTWARN(fmt, args...) fprintf(stdout, ANSI_COLOR_YELLOW"[WARN]"ANSI_COLOR_CYAN"{%s():%d}: "ANSI_COLOR_RESET fmt, \
+__func__, __LINE__,  ##args)
+#define PRINTLOG(fmt, args...) fprintf(stdout, ANSI_COLOR_BLUE"[LOG]"ANSI_COLOR_CYAN"{%s():%d}: "ANSI_COLOR_RESET fmt, \
+__func__, __LINE__, ##args)
 #else
 #define DEBUGMSG(fmt, args...)
 #define PRINTWARN(fmt, args...)

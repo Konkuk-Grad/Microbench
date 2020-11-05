@@ -4,6 +4,30 @@ from functools import reduce
 import os, signal, sys
 import inspect, csv, copy
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s:%(module)s:%(levelname)s => %(message)s  ', '%Y-%m-%d %H:%M:%S')
+
+# INFO 레벨 이상의 로그를 콘솔에 출력하는 Handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+
+# DEBUG 레벨 이상의 로그를 `debug.log`에 출력하는 Handler
+debug_handler = logging.FileHandler('debug.log')
+debug_handler.setLevel(logging.DEBUG)
+debug_handler.setFormatter(formatter)
+logger.addHandler(debug_handler)
+
+# ERROR 레벨 이상의 로그를 `error.log`에 출력하는 Handler
+error_handler = logging.FileHandler('error.log')
+error_handler.setLevel(logging.ERROR)
+error_handler.setFormatter(formatter)
+logger.addHandler(error_handler)
+
 # graph
 
 import pandas as pd
@@ -101,11 +125,20 @@ def input_value():
                     print("[!] The number entered exceeds max cores {0}".format(max_cores))
                     attr[0] = -1
                     continue
+
             if attr[1] <= 0:
                 attr[1] = int(input(attr_name[1] + ": "))
+                if (attr[1] * 2) > 126977:
+                    print("[!] The number entered exceeds processes max count (max: 126977) input: {0}".format(attr[1]))
+                    attr[1] = -1
+                    continue
 
             if attr[2] <= 0:
                 attr[2] = int(input(attr_name[2] + ": "))
+                if attr[2] > 18446744073709551615:
+                    print("[!] The number entered exceeds iteration max count (max: 18446744073709551615) input: {0}".format(attr[2]))
+                    attr[2] = -1
+                    continue
 
             if attr[3] <= 0:
                 attr[3] = int(input(attr_name[3] + ": "))
@@ -147,7 +180,9 @@ def exec_single_test(attr):
         print("[{5}] mode: {0}, topology: {1}, NoP: {2}, NoI: {3}, NoC:{4}".format(exec_attr[0], exec_attr[1], exec_attr[2], exec_attr[3], exec_attr[4], i))
         p = process([run_file_name] + [str(i) for i in exec_attr])
         p.recvuntil("{")
-        exec_time.append(float(p.recvuntil("}")[:-1]))
+        received_time = float(p.recvuntil("}")[:-1])
+        print("[*] Receive single time: " + str(received_time))
+        exec_time.append(received_time)
         sleep(0.5)
     
     return exec_time
@@ -180,9 +215,12 @@ def exec_whole_tests(attr):
 
     for i in range(1, attr[y_axis] + 1, attr[5]):
         test_attr[y_axis] = i
+        temp_list = exec_single_test(test_attr)
+        print("[*] Receive Time: " + str(temp_list))
         result_list.append(exec_single_test(test_attr))
         
     for i in range(len(result_list)):
+        print("[#] Average Time: {0}".format(sum(result_list[i]) / attr[3]))
         result_avg_list.append(sum(result_list[i]) / attr[3])
     
     filename = make_csv(x_axis, result_avg_list)
