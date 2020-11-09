@@ -4,29 +4,29 @@ from functools import reduce
 import os, signal, sys
 import inspect, csv, copy
 
-import logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+# import logging
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter('%(asctime)s:%(module)s:%(levelname)s => %(message)s  ', '%Y-%m-%d %H:%M:%S')
+# formatter = logging.Formatter('%(asctime)s:%(module)s:%(levelname)s => %(message)s  ', '%Y-%m-%d %H:%M:%S')
 
-# INFO 레벨 이상의 로그를 콘솔에 출력하는 Handler
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-console_handler.setFormatter(formatter)
-logger.addHandler(console_handler)
+# # INFO 레벨 이상의 로그를 콘솔에 출력하는 Handler
+# console_handler = logging.StreamHandler()
+# console_handler.setLevel(logging.INFO)
+# console_handler.setFormatter(formatter)
+# logger.addHandler(console_handler)
 
-# DEBUG 레벨 이상의 로그를 `debug.log`에 출력하는 Handler
-debug_handler = logging.FileHandler('debug.log')
-debug_handler.setLevel(logging.DEBUG)
-debug_handler.setFormatter(formatter)
-logger.addHandler(debug_handler)
+# # DEBUG 레벨 이상의 로그를 `debug.log`에 출력하는 Handler
+# debug_handler = logging.FileHandler('debug.log')
+# debug_handler.setLevel(logging.DEBUG)
+# debug_handler.setFormatter(formatter)
+# logger.addHandler(debug_handler)
 
-# ERROR 레벨 이상의 로그를 `error.log`에 출력하는 Handler
-error_handler = logging.FileHandler('error.log')
-error_handler.setLevel(logging.ERROR)
-error_handler.setFormatter(formatter)
-logger.addHandler(error_handler)
+# # ERROR 레벨 이상의 로그를 `error.log`에 출력하는 Handler
+# error_handler = logging.FileHandler('error.log')
+# error_handler.setLevel(logging.ERROR)
+# error_handler.setFormatter(formatter)
+# logger.addHandler(error_handler)
 
 # graph
 
@@ -43,6 +43,12 @@ mode_list = {1: "Signal", 2: "IPC", 3: "Lock"}
 topology_list = {1: "Ping-pong"}
 lock_list = {1: "Semaphore", 2: "Mutex"}
 graph_list = {1: "Per cores", 2: "Per processes"}
+
+# File types
+MODE_TYPE = {1: "SIG", 2: "IPC", 3: "MUT", 4: "SEM"}
+TOPOL_TYPE = {1: "PPT"}
+GRAPH_TYPE = {1: "COR", 2: "PRC"}
+
 process_list = []
 
 def select_mode():
@@ -109,7 +115,6 @@ def input_value():
     '''
     flag = 0
     max_cores = os.cpu_count()
-    attr = []
     attr_name = {
                     0: "Number of cores", 1: "Number of processes or processes' pairs",
                     2: "Number of pattern iterations", 3: "Number of tests", 4: "Variations of graphs", 5: "Gaps"
@@ -181,7 +186,7 @@ def exec_single_test(attr):
         p = process([run_file_name] + [str(i) for i in exec_attr])
         p.recvuntil("{")
         received_time = float(p.recvuntil("}")[:-1])
-        print("[*] Receive single time: " + str(received_time))
+        # print("[*] Receive single time: " + str(received_time))
         exec_time.append(received_time)
         sleep(0.5)
     
@@ -216,20 +221,29 @@ def exec_whole_tests(attr):
     for i in range(1, attr[y_axis] + 1, attr[5]):
         test_attr[y_axis] = i
         temp_list = exec_single_test(test_attr)
-        print("[*] Receive Time: " + str(temp_list))
-        result_list.append(exec_single_test(test_attr))
+        # print("[*] Receive Time: " + str(temp_list))
+        result_list.append(temp_list)
         
     for i in range(len(result_list)):
-        print("[#] Average Time: {0}".format(sum(result_list[i]) / attr[3]))
+        # print("[#] Average Time: {0}".format(sum(result_list[i]) / attr[3]))
         result_avg_list.append(sum(result_list[i]) / attr[3])
-    
-    filename = make_csv(x_axis, result_avg_list)
+    print("[?] len(attr): {0}".format(len(attr)))
+    print("[*] attr[6]: {0}, attr[8]: {1}, attr[4]: {2}".format(attr[6], attr[7], attr[4]))
+    print("[!] MODE_TYPE[{0}]: {1}".format(attr[6], MODE_TYPE[attr[6]]))
+    print("[!] TOPOL_TYPE[{0}]: {1}".format(attr[7], TOPOL_TYPE[attr[7]]))
+    print("[!] GRAPH_TYPE[{0}]: {1}".format(attr[4], GRAPH_TYPE[attr[4]]))
+    filetype = [MODE_TYPE[attr[6]], TOPOL_TYPE[attr[7]], GRAPH_TYPE[attr[4]]]
+
+    filename = make_csv(x_axis, result_avg_list, filetype)
     return filename
     
     
-def make_csv(x_axis, y_axis):
+def make_csv(x_axis, y_axis, filetype):
     now = datetime.now()
-    filename = "{0}{1}{2}{3}{4}{5}.csv".format(now.year, now.month, now.day, now.hour, now.minute, now.second)
+    filename = "{0}{1:02d}{2:02d}{3:02d}{4:02d}{5:02d}_{6}_{7}_{8}.csv".format(
+                now.year, now.month, now.day, now.hour, now.minute, now.second,
+                filetype[0], filetype[1], filetype[2]
+                )
     with open(filename, 'w', newline='\n') as csvfile:
         csvfile.write("index,time\n")
         for i in range(len(x_axis)):
@@ -242,11 +256,25 @@ def print_graph(filename):
     df = pd.read_csv(filename, index_col='index')
     plot = df.plot(marker='o')
 
-    plot.set_xlabel('index')
+    x_axis = list(df.index)
+    y_axis = list(df["time"])
+
+    x_label = graph_list[[k for k, v in GRAPH_TYPE.items() if v == filename[-7:-4]][0]]
+    # plot.bar(x, y)
+    for i, v in enumerate(x_axis):
+        plot.text(v, y_axis[i], "{0:.4f}".format(y_axis[i]),
+                fontsize = 9,
+                color='blue',
+                horizontalalignment='center',
+                verticalalignment='bottom')
+
+    plot.set_xticks(x_axis)
+    
+    plot.set_xlabel(x_label)
     plot.set_ylabel('time (ms)')
 
     plt.grid(True)
-    plt.minorticks_on()
+    # plt.minorticks_on()
 
     # Save graph image file
     plt.savefig("./" + filename[:-3])
@@ -279,8 +307,9 @@ def init_menu():
 if __name__ == "__main__":
     filename = init_menu()
     ip = input("Save as png file? (Y/N): ")
+
     if 'Y' in ip or 'y' in ip:
         print_graph(filename)
 
-    # filename = "202097152945.csv"
+    # filename = "20209281473.csv"
     # print_graph(filename)
