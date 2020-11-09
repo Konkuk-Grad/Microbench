@@ -11,5 +11,11 @@ double ipc_test(int topology, int processes, int iter, int cores){
             return 0;
     }
 
+    if(!measure_time) {
+        PRINTERROR("IPC TEST EXECUTION FAIL\n");
+    }
+    else {
+        PRINTRESULT("topology:%d, process_pairs:%d, iteration:%d, cores:%d, measure_time_per_pair:%lf\n", topology, processes, iter, cores, measure_time);
+    }
     return measure_time;
 }

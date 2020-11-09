@@ -8,10 +8,10 @@ double mq_pingpong(int pairs, int iter, int cores) {
 	double value = 0;
 	double measure_time = 0;
 	struct mq_attr attr; // 메세지 큐 특성 설정 구조체
-    	mqd_t mq_pp_mqdes; // 메세지 큐 디스크립터 타입
+    mqd_t mq_pp_mqdes; // 메세지 큐 디스크립터 타입
 
-        attr.mq_maxmsg = MQ_PP_MAX_MSG; // 메세지 큐 크기
-        attr.mq_msgsize = MQ_PP_MSG_SIZE; // 메세지 크기(바이트)
+    attr.mq_maxmsg = MQ_PP_MAX_MSG; // 메세지 큐 크기
+    attr.mq_msgsize = MQ_PP_MSG_SIZE; // 메세지 크기(바이트)
 	mq_pp_mqdes = mq_open(MQ_PP_NAME, O_CREAT | O_RDWR, 0660, &attr);
 
 	for(int i = 0; i < 2 * pairs; i++) {
@@ -40,7 +40,14 @@ double mq_pingpong(int pairs, int iter, int cores) {
 	}
 
 	mq_close(mq_pp_mqdes);
-    	mq_unlink(MQ_PP_NAME);
+    mq_unlink(MQ_PP_NAME);
+
+	if(!measure_time) {
+        PRINTERROR("MESSAGE QUEUE PING-PONG TEST FAIL\n");
+    }
+    else {
+		PRINTRESULT("process_paris:%d, iteration:%d, cores:%d, full_measure_time:%lf\n", pairs, iter, cores, measure_time);
+	}
 
 	return measure_time / pairs;
 }
@@ -74,13 +81,13 @@ double mq_ping(int num, int iter, int cores){
 	set_core_affinity(cores); 
 
 	for(int i = 0; i < iter; i++) {
-        	//printf("%d ping sending a message %d with priority %d\n", num, i, ping_prio);
+        	PRINTRESULT("%d ping sending a message %d with priority %d\n", num, value, ping_prio);
         	if(mq_send(pong_mqdes, (char *)&value, MQ_MSG_SIZE, ping_prio) == -1) {
             		perror("mq_send() fail\n");
 		}
 		
 		if(mq_receive(ping_mqdes, (char *)&value, MQ_MSG_SIZE, &pong_prio) != -1) {
-			//printf("%d ping received a message %d with priority %d\n", num, value, pong_prio);
+			PRINTRESULT("%d ping received a message %d with priority %d\n", num, value, pong_prio);
 		}
 
 		if(i == 0) {
@@ -88,7 +95,7 @@ double mq_ping(int num, int iter, int cores){
 		}
     	}
 	time = get_time_diff(1);
-    	//printf("Pair%d PingPong Elapsed Time: %f \n", num/2, time);
+    PRINTRESULT("Pair%d PingPong Elapsed Time: %f \n", num/2, time);
     	
 	mq_close(ping_mqdes);
     	mq_unlink(ping_name);
@@ -124,9 +131,9 @@ int mq_pong(int num, int iter, int cores){
 	set_core_affinity(cores); 
         for(int i = 0; i < iter; i++) {
                 if(mq_receive(pong_mqdes, (char *)&value, MQ_MSG_SIZE, &ping_prio) != -1) {
-                        //printf("%d pong received a message %d with priority %d\n", num, value, ping_prio);
+                        PRINTRESULT("%d pong received a message %d with priority %d\n", num, value, ping_prio);
                 }
-                //printf("%d pong sending a message %d with priority %d\n", num, i, pong_prio);
+                PRINTRESULT("%d pong sending a message %d with priority %d\n", num, value, pong_prio);
                 if(mq_send(ping_mqdes, (char *)&value, MQ_MSG_SIZE, pong_prio) == -1) {
                         perror("mq_send() fail\n");
                 }
@@ -151,9 +158,29 @@ void set_core_affinity(int cores) {
     	}
 
 	if(sched_setaffinity(pid, sizeof(cpu_mask), &cpu_mask)) {
-		printf("failed to get affinity\n");
+		PRINTERROR("FAILED TO SET AFFINITY\n");
 		exit(1);
 	}
+
+	#ifdef __ESSENTIAL
+	print_core_affinity();
+	#endif
+}
+
+void print_core_affinity() {
+	cpu_set_t cpu_mask;
+	long nproc, i;
+
+	if (sched_getaffinity(0, sizeof(cpu_set_t), &cpu_mask) == -1) {
+		PRINTERROR("FAILED TO GET AFFINITY\n");
+		exit(1);
+	}
+	nproc = sysconf(_SC_NPROCESSORS_ONLN);
+	PRINTRESULT("CORE AFFINITY : ");
+	for(i = 0; i < nproc; i++) {
+		printf("%d ", CPU_ISSET(i, &cpu_mask));
+	}
+	printf("\n");
 }
 
 /* Measure time different */
@@ -166,14 +193,16 @@ double get_time_diff(unsigned int flag) { // flag 0:start, 1:end
 	if(flag == 0) {
 		ret_diff = 0;
 		if(clock_gettime(CLOCK_MONOTONIC, &start_ts) == -1) {
-			printf("failed to call clock_gettime\n");
+			PRINTERROR("failed to call clock_gettime\n");
 		}
+		PRINTRESULT("time init to 0\n");
 	}
 	else {
 		if(clock_gettime(CLOCK_MONOTONIC, &end_ts) == -1) {
-			printf("failed to call clock_gettime\n");
+			PRINTERROR("failed to call clock_gettime\n");
 		}
 		ret_diff = NANOS * (end_ts.tv_sec - start_ts.tv_sec) + (end_ts.tv_nsec - start_ts.tv_nsec);
+		PRINTRESULT("time result %lf(mili sec)\n", (double)ret_diff/1000000);
 	}
 	return (double)ret_diff/1000000; //나노세컨을 mili세컨으로 바꿔서 리턴
 }
