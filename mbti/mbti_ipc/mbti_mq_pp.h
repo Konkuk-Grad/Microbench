@@ -40,6 +40,7 @@ double mq_pingpong(int pairs, int iter, int cores);
 double mq_ping(int num, int iter, int cores);
 int mq_pong(int num, int iter, int cores);
 void set_core_affinity(int cores);
+void print_core_affinity();
 double get_time_diff(unsigned int flag);
 void shm_create();
 void shm_write(long long *shareddata, int size);
