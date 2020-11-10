@@ -20,13 +20,22 @@
 double sig_test(int topology, int processes, int iter, int num_cpus){
     pid_t* trig_pid = NULL;
     double measure_time = 0;
-
+#ifdef CASE18
+    DEBUGMSG("[CASE18] topology: %d, Number of processes' pairs: %d, iter: %d, cores: %d\n",
+            topology, processes, iter, num_cpus);
+#endif
     trig_pid = sig_test_init(topology, processes, iter, num_cpus);
 
-    DEBUGMSG("processes: %d, trig_pid = %p\n", processes, trig_pid);
-    for(int i = 0; i < processes; i++){
-        DEBUGMSG("trig_pid[%d]: %d\n", i, trig_pid[i]);
+    if(trig_pid == NULL){
+        // All kill?
+        PRINTERROR("sig_test_init failed!\n");
+        return -1;
     }
+
+    // DEBUGMSG("processes: %d, trig_pid = %p\n", processes, trig_pid);
+    // for(int i = 0; i < processes; i++){
+    //     DEBUGMSG("trig_pid[%d]: %d\n", i, trig_pid[i]);
+    // }
     
     measure_time = sig_test_exec(trig_pid, processes, topology);
 
@@ -42,14 +51,30 @@ double sig_test(int topology, int processes, int iter, int num_cpus){
  * 사용자의 매개변수에 따라 실행해놓고 process들을 정지시켜놓아야 함. 
  */
 pid_t* sig_test_init(int topology, int processes, int iter, int num_cpus){ // Signal Test Initialization
+    pid_t* pid_list = NULL;
     switch(topology){
         case 1: // Ping-pong
-            return init_pingpong(processes, iter, num_cpus);
+            pid_list = init_pingpong(processes, iter, num_cpus);
+            break;
         default:
-            return NULL;
+            break;
     }
 
-    return NULL;
+    if(pid_list == NULL){
+        PRINTERROR("Normal Initializing failed\n");
+    } 
+#ifdef CASE19
+    else{
+        int i = 0;
+        DEBUGMSG("[CASE19] pid_list: ");
+        do{
+            printf("%d ", pid_list[i]);
+        }while(pid_list[++i] != 0);
+        printf("\n");
+    }
+#endif
+
+    return pid_list;
 } 
 
 /*
@@ -59,13 +84,14 @@ pid_t* sig_test_init(int topology, int processes, int iter, int num_cpus){ // Si
  * 4. return_time으로 측정된 시간 반환
  */
 double sig_test_exec(pid_t *trig_pid, int processes, int topology){ // Signal Test
+    int status = 2;
     mqd_t mfd = -1;
     struct mq_attr msgqattr;
     time_msg msgbox;
 
     double* measure_times;
     measure_times = (double *)malloc(sizeof(double) * processes);
-    DEBUGMSG("MQ_FILE: %s, getpid(): %d\n", MQ_FILE, getpid());
+    // DEBUGMSG("MQ_FILE: %s, getpid(): %d\n", MQ_FILE, getpid());
 
     // Triggered by user
 #ifdef USER_EXEC
@@ -107,6 +133,10 @@ double sig_test_exec(pid_t *trig_pid, int processes, int topology){ // Signal Te
 
     // Send signals to child processes to send messages
     for(int i = 0; i < processes; i++){
+#ifdef CASE22
+        clock_gettime(CLOCK_MONOTONIC, &cont_point);
+        PRINTWARN("[CASE22] {pid: %d} Cont pid: %d / %ld ns\n", getpid(), trig_pid[i], (cont_point.tv_sec * 1000000000 + cont_point.tv_nsec));
+#endif
         kill(trig_pid[i], SIGCONT);
     }
 
@@ -116,7 +146,11 @@ double sig_test_exec(pid_t *trig_pid, int processes, int topology){ // Signal Te
             perror("receive error");
         } else {
             measure_times[i] = msgbox.measure_time;
-            DEBUGMSG("measure_times[%d]: %f\n", i, measure_times[i]);
+#ifdef CASE20
+            if(!WIFEXITED(status)){
+                DEBUGMSG("[CASE20] Recv {%f} ms \n", measure_times[i]);
+            }
+#endif
         }
     }
 
