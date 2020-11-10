@@ -157,3 +157,11 @@ double sig_test(int topology, int processes, int iter, int num_cpus){
     4. 필터링 결과 ![Filtering result](.readme/kernel_shark_4.PNG)
     
     5. 결론은 이거 열심히 필터링 해서 확인하시면 됩니다.
+
+## 7. 생성된 CSV 및 PNG 파일명 규칙
+- 그래프 출력을 위해 다음 규칙이 추가되었으며 이는 script.py로 파일을 생성할 시에만 적용이 됨.
+- YYYYMMDDHHXXSS_{TYPE}_{TOPOLOPY}_{GRAPHTYPE}
+- YYYY: Year, MM: Month, DD: Day, HH: Hour, XX: Minute, SS: Second
+- TYPE: SIG(Signal), IPC(IPC), MUT(Mutex), SEM(Semaphore)
+- TOPOLOGY: PPT(Ping-Pong Test)
+- GRAPHTYPE: COR(Variation about Number of Cores), PRC(Variation about number of processses)

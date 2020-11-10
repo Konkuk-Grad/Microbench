@@ -2,19 +2,25 @@
 
 /* 1) Ping Process */
 void recv_pong(){
-    // clock_gettime(CLOCK_MONOTONIC, &end_point); // Individual checking time
-    
-    if(curr_iter_count++ < user_iter_count){
-        PRINTLOG("[I] I->O ping_count: %d\n", recv_ping_count); // Send ping
-        kill(pong_pid, SIGUSR1);        
+    // Receive pong
+    if(++curr_iter_count < user_iter_count){
+#ifdef CASE23
+        PRINTLOG("[CASE23] {pid: %d} Receive pong, Send ping curr_iter_count: %d, user_iter_count: %d\n", getpid(), curr_iter_count, user_iter_count);
+#endif
+        kill(pong_pid, SIGUSR1); // Send ping
     } else {
         clock_gettime(CLOCK_MONOTONIC, &end_point);
-        PRINTLOG("[Terminate][I] I->O ping_count: %d\n", --curr_iter_count);
+#ifdef CASE24
+        PRINTWARN("[CASE24] {pid: %d} Receive pong, Terminate curr_iter_count: %d, user_iter_count: %d\n", getpid(), curr_iter_count, user_iter_count);
+#endif
         kill(pong_pid, SIGUSR2); // Terminate pong process
     }
 }
 
 void end_ping(){
+#ifdef CASE27
+    PRINTWARN("{pid: %d} Receive SIGUSR2!\n", getpid());
+#endif
     time_msg msgbox;
 
     int mfd = -1, tmp = -1;
@@ -43,31 +49,37 @@ void end_ping(){
         msgbox.mtype = 0;
         msgbox.measure_time = (end_point.tv_sec - start_point.tv_sec) * 1000 + (double)(end_point.tv_nsec - start_point.tv_nsec) / 1000000;
 
-        if(mq_send(mfd, (const char *)&msgbox, sizeof(time_msg), 0) == -1){
+        if((tmp = mq_send(mfd, (const char *)&msgbox, sizeof(time_msg), 0)) == -1){
             perror("[end_ping] send time error");
             exit(-1);
+        } else {
+#ifdef CASE25
+            DEBUGMSG("[CASE25] {pid: %d} mq_send ret: %d, Send {%f} ms \n", getpid(), tmp, msgbox.measure_time);
+#endif
         }
     }
 
-    DEBUGMSG("[Total  ] {%f} ms\n", measure_time);
-    DEBUGMSG("[Average] {%f} ms/iter \n", measure_time / user_iter_count);
-
-    exit(0);
+    exit(getpid());
 }
 
 /* 2) Pong Process */
 void recv_ping(){
     if(recv_ping_count++ < user_iter_count){
+#ifdef CASE26
+        PRINTLOG("[CASE26] {pid: %d} Receive ping, Send pong recv_ping_count: %d, user_iter_count: %d\n", getpid(), recv_ping_count, user_iter_count);
+#endif
         kill(ping_pid, SIGUSR1); // SEND PONG
-        PRINTLOG("[O] O->I recv_ping_count: %d\n", recv_ping_count); // Send pong
     } else {
         // dummy else
     }
 }
 
 void end_pong(){
-    PRINTWARN("[endpong][O] recv_ping_count: %d\n", recv_ping_count);
-    kill(ping_pid, SIGUSR2);
+    int ret = -2;
+    ret = kill(ping_pid, SIGUSR2);
+#ifdef CASE27
+    PRINTWARN("[CASE27] {pid: %d} kill ret: %d\n", getpid(), ret);
+#endif
     exit(0);    
 }
 
@@ -126,6 +138,10 @@ pid_t* init_pingpong(int pairs, int iter, int num_cpus){
                 }            
 
                 /* Ping-pong logic */
+#ifdef CASE22
+                clock_gettime(CLOCK_MONOTONIC, &wait_point);
+                PRINTWARN("[CASE22] {pid: %d} %ld ns\n", getpid(), (wait_point.tv_sec * 1000000000 + wait_point.tv_nsec));
+#endif
                 kill(getpid(), SIGSTOP);
                 clock_gettime(CLOCK_MONOTONIC, &start_point);
                 recv_pong();
@@ -157,10 +173,28 @@ pid_t* init_pingpong(int pairs, int iter, int num_cpus){
                     sigsuspend(&oldset);
                 }
             }
-        } else {
-            DEBUGMSG("pid: %d, fork: %d\n", getpid(), i);
+        } else if(pid_arr[i] < 0) { // Fork Error
+            PRINTERROR("[CASE19] Fork Failed!\n");
+            for(int j = 0; j < i; j++){
+                kill(pid_arr[i], SIGKILL);
+            }
+            free(pid_arr);
+            return NULL;
+        } else { // Parent (Fork Success)
+#ifdef CASE21
+            DEBUGMSG("[CASE21] pid: %d, fork: %d\n", getpid(), i);
+#endif
         }
     }
+
+#ifdef CASE21
+    PRINTRESULT("[CASE21] Return children pid_list\n");
+    DEBUGMSG("[CASE21] ");
+    for(int i = 0; i < pairs; i++){
+        printf("%d ", pid_arr[i]);
+    }
+    printf("\n\n");
+#endif
 
     return pid_arr;
 }

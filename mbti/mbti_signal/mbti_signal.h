@@ -10,21 +10,6 @@
 /* ------- */
 #define MQ_FILE "/mbti_sig_mq"
 
-#define ANSI_COLOR_RED "\x1b[31m" 
-#define ANSI_COLOR_GREEN "\x1b[32m" 
-#define ANSI_COLOR_YELLOW "\x1b[33m" 
-#define ANSI_COLOR_BLUE "\x1b[34m" 
-#define ANSI_COLOR_MAGENTA "\x1b[35m" 
-#define ANSI_COLOR_CYAN "\x1b[36m" 
-#define ANSI_COLOR_RESET "\x1b[0m" 
-
-#ifdef __DEBUGMSG
-#define DEBUGMSG(fmt, args...) fprintf(stderr, ANSI_COLOR_RED"[DEBUGMSG]"ANSI_COLOR_CYAN"{%s:%d:%s()}: "ANSI_COLOR_RESET fmt, \
-__FILE__, __LINE__, __func__, ##args)
-#else
-#define DEBUGMSG(fmt, args...)
-#endif
-
 /* ------- */
 /* Headers */
 /* ------- */
@@ -43,6 +28,9 @@ typedef struct __time_msg{
 /* ---------------- */
 /* Global Variables */
 /* ---------------- */
+#ifdef CASE22
+struct timespec wait_point, cont_point;
+#endif
 struct timespec start_point, end_point; // 측정 시작 시각, 측정 종료 시각
 double measure_time; // 측정 시간
 int complete_processes; // 테스트 완료된 프로세스 개수
