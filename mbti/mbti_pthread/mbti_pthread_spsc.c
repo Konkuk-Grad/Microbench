@@ -20,7 +20,7 @@ void pthread_create_pair(){
     for(int i = 0; i < pthread_thread_num; i++){
         pid = fork();
         if(pid == 0){
-            DEBUGMSG("Processes Generated %d\n",getpid());
+            PRINTERROR("Processes Generated %d\n",getpid());
             pthread_spsc_thread_act();
             exit(0);
         } else if(pid <0 ){
