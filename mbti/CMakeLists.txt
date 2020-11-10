@@ -16,8 +16,8 @@ aux_source_directory(mbti_pthread PTHREAD_SRC)
 # USER_EXEC이 활성화 되지 않을 경우 특정 Signal이 Triggering 되지 않을 때 까지 대기합니다.
 add_definitions(-DUSER_EXEC)
 
-# add_definitions(-DUSER_EXEC -D__DEBUGMSG -D__ESSENTIAL)
-# add_definitions(-DCASE18 -DCASE19 -DCASE20 -DCASE21 -DCASE22 -DCASE23 -DCASE24 -DCASE25 -DCASE26 -DCASE27)
+add_definitions(-DUSER_EXEC -D__DEBUGMSG -D__ESSENTIAL)
+add_definitions(-DCASE18 -DCASE19 -DCASE20 -DCASE21 -DCASE22 -DCASE23 -DCASE24 -DCASE25 -DCASE26 -DCASE27)
 
 
 
