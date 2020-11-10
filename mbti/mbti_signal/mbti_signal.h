@@ -19,7 +19,7 @@
 #define ANSI_COLOR_RESET "\x1b[0m" 
 
 #ifdef __DEBUGMSG
-#define DEBUGMSG(fmt, args...) fprintf(stderr, ANSI_COLOR_RED"[DEBUGMSG]"ANSI_COLOR_CYAN"{%s:%d:%s()}: "ANSI_COLOR_RESET fmt, \
+#define DEBUGMSG(fmt, args...) fprintf(stderr, ANSI_COLOR_RED"[DEBUGMSG]"ANSI_COLOR_CYAN"{%s:%d:%s()}: \t"ANSI_COLOR_RESET fmt, \
 __FILE__, __LINE__, __func__, ##args)
 #else
 #define DEBUGMSG(fmt, args...)

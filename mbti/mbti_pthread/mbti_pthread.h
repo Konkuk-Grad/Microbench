@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
+#include "../mbti.h"
 
 #ifndef PTHREAD_ATTR
     #define PTHREAD_ATTR 1

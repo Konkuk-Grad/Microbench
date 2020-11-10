@@ -23,9 +23,10 @@ void init_pthread(){
     pthread_start_point = (struct timespec*)malloc(sizeof(struct timespec)* pthread_thread_num);
     pthread_end_point   = (struct timespec*)malloc(sizeof(struct timespec)* pthread_thread_num);
     if( !pthread_start_point || !pthread_end_point){
-        PRINTERROR("[Pthread]init_pthread failed");
+        PRINTERROR("[Pthread]init_pthread failed\n");
+        exit(1);
     }else{
-        DEBUGMSG("start_point addr : %x, end_point addr : %x", pthread_start_point, pthread_end_point);
+        DEBUGMSG("start_point addr : %x, end_point addr : %x\n", pthread_start_point, pthread_end_point);
     }
 }
 /* This function free variables which use malloc */
@@ -35,9 +36,10 @@ void exit_pthread(){
     free(pthread_end_point);
     pthread_end_point =NULL;
     if(!pthread_end_point || !pthread_start_point){
-        DEBUGMSG("Free Done");
+        DEBUGMSG("Free Done\n");
     }else{
-        PRINTERROR("[Pthread]exit_pthread failed")
+        PRINTERROR("[Pthread]exit_pthread failed\n");
+        exit(1);
     }
 }
 /* This function is from calculate time spent */
@@ -55,14 +57,14 @@ double return_result(){
 void pthread_setaffinity(cpu_set_t mask){
     pthread_t current_thread = pthread_self();
     if(mask.__bits == 0){
-        PRINTERROR("[Pthread] mask = %d",mask);
+        PRINTERROR("[Pthread] mask = %d\n",mask);
+        exit(1);
     }
     if(pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &mask)){
-        PRINTERROR("[Pthread]pthread_setaffinity_np failed");
-        fprintf(stderr, "affinity error");
+        PRINTERROR("[Pthread]pthread_setaffinity_np failed\n");
         exit(0);
     }
-    DEBUGMSG("Set affinity Done");
+    DEBUGMSG("Set affinity Done\n");
 }
 void create_pthread(void* thread_func){
     pthread_t *p_thread = (pthread_t*)malloc(sizeof(pthread_t)*pthread_thread_num);
@@ -71,11 +73,11 @@ void create_pthread(void* thread_func){
     for(int i = 0; i < pthread_thread_num; i++){
         pthread_id = pthread_create(&p_thread[i], NULL, thread_func, (void*)i);
         if (pthread_id < 0){
-            PRINTERROR("[Pthread]pthread_create failed");
+            PRINTERROR("[Pthread]pthread_create failed\n");
             exit(0);
         }
     }
-    DEBUGMSG("%d Threads Generated", pthread_thread_num);
+    DEBUGMSG("%d Threads Generated\n", pthread_thread_num);
     for(int i = 0; i < pthread_thread_num; i++){
             pthread_join(p_thread[i],(void**)&status);
     }
@@ -94,13 +96,17 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
     double res = 0;
 
     if(topology < 0){
-        PRINTWARN("Topology : %d", topology);
+        PRINTERROR("Topology : %d\n", topology);
+        exit(1);
     }else if (processes < 0){
-        PRINTWARN("processes Num : %d",processes);
+        PRINTERROR("processes Num : %d\n",processes);
+        exit(1);
     }else if (iter < 0){
-        PRINTWARN("Iteration : %d",iter);
+        PRINTERROR("Iteration : %d\n",iter);
+        exit(1);
     }else if (num_cpus < 0){
-        PRINTWARN("CPU Num : %d",num_cpus);
+        PRINTERROR("CPU Num : %d\n",num_cpus);
+        exit(1);
     }
 
 
@@ -114,7 +120,7 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
     for(int i = 0; i < num_cpus; i++){
         CPU_SET(i, &pthread_mask);
     }
-    DEBUGMSG("Input Value Set");
+    DEBUGMSG("Input Value Set\n");
     //3.
     switch (topology)
     {
@@ -139,7 +145,7 @@ double pthread_test(int topology, int processes, int iter, int num_cpus){
     } else {
         ((void(*)())thread_func)();
     }
-    DEBUGMSG("Pthread TASK Done");
+    DEBUGMSG("Pthread TASK Done\n");
    //5.
     res = return_result();
     exit_pthread();
