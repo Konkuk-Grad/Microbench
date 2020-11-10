@@ -32,6 +32,7 @@ int main(int argc, char *argv[]){
     cores = atoi(argv[5]);
 
     double measure_time = 0;
+
     switch(mode){
         case 1: // Signal
             measure_time = sig_test(topology, pairs, iter, cores);
