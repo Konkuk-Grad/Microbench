@@ -12,7 +12,8 @@ void* pthread_global_thread_act(void* arg){
     int thread_id = (int)arg;
     pid_t tid;
    
-    pthread_setaffinity();
+    pthread_setaffinity(pthread_mask);
+    PRINTDEBUG("affinity set");
     pthread_mutex_lock(&pthread_condition_lock);
     pthread_ready_flag+=1;
     while(pthread_ready_flag != pthread_thread_num){
@@ -25,6 +26,10 @@ void* pthread_global_thread_act(void* arg){
     for(l_counter = 0; l_counter < pthread_try_count;l_counter++){
         increase_counter(thread_id);
     }
+    PRINTDEBUG("increase_counter Done\n");
     clock_gettime(CLOCK_MONOTONIC, &pthread_end_point[thread_id]);
+    if(l_counter != pthread_try_count){
+        PRINTWARN("Race Condition Occored\n");
+    }
     pthread_exit((void*)tid);
 }

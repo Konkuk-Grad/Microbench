@@ -31,6 +31,6 @@
     double pthread_test(int topology, int processes, int iter, int num_cpus);
     void init_pthread();
     double return_result();
-    void pthread_setaffinity();
+    void pthread_setaffinity(cpu_set_t mask);
 #endif
 

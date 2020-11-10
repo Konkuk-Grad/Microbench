@@ -23,7 +23,7 @@ void* pthread_inter_create_pair(void* arg){
 void* pthread_inter_pair1(void* arg){
     int id = (int)arg;
     int iter = pthread_try_count;
-    pthread_setaffinity();
+    pthread_setaffinity(pthread_mask);
     clock_gettime(CLOCK_MONOTONIC, &p_msg.start_point);
     for(int i = 0; i < iter; i++){
         //ping
@@ -54,7 +54,7 @@ void* pthread_inter_pair1(void* arg){
 void* pthread_inter_pair2(void* arg){
     int id = (int)arg;
     int iter = pthread_try_count;
-    pthread_setaffinity();
+    pthread_setaffinity(pthread_mask);
     for(int i = 0; i < iter; i++){
         //ping
         pthread_mutex_lock(&pthread_lock);
