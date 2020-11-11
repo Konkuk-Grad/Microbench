@@ -130,18 +130,30 @@ def input_value():
                     print("[!] The number entered exceeds max cores {0}".format(max_cores))
                     attr[0] = -1
                     continue
+                elif attr[0] <= 0:
+                    print("[!] The number entered less equal than 0")
+                    attr[0] = -1
+                    continue
 
             if attr[1] <= 0:
                 attr[1] = int(input(attr_name[1] + ": "))
-                if (attr[1] * 2) > 126977:
-                    print("[!] The number entered exceeds processes max count (max: 126977) input: {0}".format(attr[1]))
+                if (attr[1] * 2) > 512:
+                    print("[!] The number entered exceeds processes max count (max: 256 pairs, 512 processes/threads) input: {0}".format(attr[1]))
+                    attr[1] = -1
+                    continue
+                elif (attr[1] * 2) <= 0:
+                    print("[!] The number entered less equal than 0. input: {0}".format(attr[1]))
                     attr[1] = -1
                     continue
 
             if attr[2] <= 0:
                 attr[2] = int(input(attr_name[2] + ": "))
-                if attr[2] > 18446744073709551615:
-                    print("[!] The number entered exceeds iteration max count (max: 18446744073709551615) input: {0}".format(attr[2]))
+                if attr[2] > 1000000:
+                    print("[!] The number entered exceeds iteration max count (max: 1000000) input: {0}".format(attr[2]))
+                    attr[2] = -1
+                    continue
+                elif attr[2] <= 0:
+                    print("[!] The number entered less equal than 0. input: {0}".format(attr[2]))
                     attr[2] = -1
                     continue
 
