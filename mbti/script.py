@@ -239,11 +239,6 @@ def exec_whole_tests(attr):
     for i in range(len(result_list)):
         # print("[#] Average Time: {0}".format(sum(result_list[i]) / attr[3]))
         result_avg_list.append(sum(result_list[i]) / attr[3])
-    print("[?] len(attr): {0}".format(len(attr)))
-    print("[*] attr[6]: {0}, attr[8]: {1}, attr[4]: {2}".format(attr[6], attr[7], attr[4]))
-    print("[!] MODE_TYPE[{0}]: {1}".format(attr[6], MODE_TYPE[attr[6]]))
-    print("[!] TOPOL_TYPE[{0}]: {1}".format(attr[7], TOPOL_TYPE[attr[7]]))
-    print("[!] GRAPH_TYPE[{0}]: {1}".format(attr[4], GRAPH_TYPE[attr[4]]))
     filetype = [MODE_TYPE[attr[6]], TOPOL_TYPE[attr[7]], GRAPH_TYPE[attr[4]]]
 
     filename = make_csv(x_axis, result_avg_list, filetype)
