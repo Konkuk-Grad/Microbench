@@ -1,7 +1,6 @@
 #include "mbti_pthread.h"
 #include "mbti_pthread_spsc.h"
 #include "mbti_pthread_global.h"
-#include "mbti_pthread_inter_spsc.h"
 #include <fcntl.h>
 #include <mqueue.h>
 
