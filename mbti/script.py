@@ -130,18 +130,30 @@ def input_value():
                     print("[!] The number entered exceeds max cores {0}".format(max_cores))
                     attr[0] = -1
                     continue
+                elif attr[0] <= 0:
+                    print("[!] The number entered less equal than 0")
+                    attr[0] = -1
+                    continue
 
             if attr[1] <= 0:
                 attr[1] = int(input(attr_name[1] + ": "))
-                if (attr[1] * 2) > 126977:
-                    print("[!] The number entered exceeds processes max count (max: 126977) input: {0}".format(attr[1]))
+                if (attr[1] * 2) > 512:
+                    print("[!] The number entered exceeds processes max count (max: 256 pairs, 512 processes/threads) input: {0}".format(attr[1]))
+                    attr[1] = -1
+                    continue
+                elif (attr[1] * 2) <= 0:
+                    print("[!] The number entered less equal than 0. input: {0}".format(attr[1]))
                     attr[1] = -1
                     continue
 
             if attr[2] <= 0:
                 attr[2] = int(input(attr_name[2] + ": "))
-                if attr[2] > 18446744073709551615:
-                    print("[!] The number entered exceeds iteration max count (max: 18446744073709551615) input: {0}".format(attr[2]))
+                if attr[2] > 1000000:
+                    print("[!] The number entered exceeds iteration max count (max: 1000000) input: {0}".format(attr[2]))
+                    attr[2] = -1
+                    continue
+                elif attr[2] <= 0:
+                    print("[!] The number entered less equal than 0. input: {0}".format(attr[2]))
                     attr[2] = -1
                     continue
 
@@ -227,11 +239,6 @@ def exec_whole_tests(attr):
     for i in range(len(result_list)):
         # print("[#] Average Time: {0}".format(sum(result_list[i]) / attr[3]))
         result_avg_list.append(sum(result_list[i]) / attr[3])
-    print("[?] len(attr): {0}".format(len(attr)))
-    print("[*] attr[6]: {0}, attr[8]: {1}, attr[4]: {2}".format(attr[6], attr[7], attr[4]))
-    print("[!] MODE_TYPE[{0}]: {1}".format(attr[6], MODE_TYPE[attr[6]]))
-    print("[!] TOPOL_TYPE[{0}]: {1}".format(attr[7], TOPOL_TYPE[attr[7]]))
-    print("[!] GRAPH_TYPE[{0}]: {1}".format(attr[4], GRAPH_TYPE[attr[4]]))
     filetype = [MODE_TYPE[attr[6]], TOPOL_TYPE[attr[7]], GRAPH_TYPE[attr[4]]]
 
     filename = make_csv(x_axis, result_avg_list, filetype)

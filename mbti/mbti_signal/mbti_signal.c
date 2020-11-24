@@ -96,7 +96,7 @@ double sig_test_exec(pid_t *trig_pid, int processes, int topology){ // Signal Te
     // Triggered by user
 #ifdef USER_EXEC
     DEBUGMSG("Triggered by user\n");
-    sleep(5);
+    sleep(2);
 #else
     DEBUGMSG("Wait until getting SIGCONT\n");
     kill(getpid(), SIGSTOP);
