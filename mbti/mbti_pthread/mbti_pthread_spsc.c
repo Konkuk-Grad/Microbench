@@ -20,10 +20,12 @@ void pthread_create_pair(){
     for(int i = 0; i < pthread_thread_num; i++){
         pid = fork();
         if(pid == 0){
+            DEBUGMSG("Processes Generated %d\n",getpid());
             pthread_spsc_thread_act();
             exit(0);
         } else if(pid <0 ){
-            perror("[fork]");
+            PRINTERROR("[Pthread] fork failed\n");
+            exit(1);
         }
     }
     if(pid != 0){
@@ -54,11 +56,15 @@ void pthread_spsc_thread_act(){
     }
     
     if(pthread_create(&thread_id[0], NULL, pthread_pair1,(void*)pthread_try_count) < 0){
-        perror("[pthread_spsc_thread_create]");
+        PRINTERROR("[Pthread]pthread_create failed\n");
+        exit(1);
     }
+    DEBUGMSG("pthread producer Generated\n");
     if(pthread_create(&thread_id[1], NULL, pthread_pair2,(void*)pthread_try_count) < 0){
-        perror("[pthread_spsc_thread_create]");
+        PRINTERROR("[Pthread]pthread_create failed\n");
+        exit(1);
     }
+    DEBUGMSG("pthread comsumer Generated\n");
 
     pthread_join(thread_id[0],NULL);
     pthread_join(thread_id[1],NULL);
@@ -71,7 +77,7 @@ void pthread_spsc_thread_act(){
 void* pthread_pair1(void* arg){
     int iter = (int)arg;
     char local = 1;
-    pthread_setaffinity();
+    pthread_setaffinity(pthread_mask);
     clock_gettime(CLOCK_MONOTONIC, &p_msg.start_point);
     for(int i = 0; i < iter; i++){
         //producing
@@ -81,6 +87,7 @@ void* pthread_pair1(void* arg){
         }
         pthread_buf = local;
         // strncpy(pthread_buf, "Hello pair2!", 12);
+        DEBUGMSG("Critical Section : pair1 push\n");
         pthread_count = 1;
         pthread_cond_signal(&pthread_empty);
         pthread_mutex_unlock(&pthread_lock);
@@ -89,6 +96,7 @@ void* pthread_pair1(void* arg){
         while(pthread_count2 == 0){
             pthread_cond_wait(&pthread_empty2,&pthread_lock2);
         }
+        DEBUGMSG("Critical Section : pair1 pull\n");
         // fprintf(stderr,"[%s] from pair2\n", pthread_buf);
         // memset(pthread_buf,0,256);
         local = pthread_buf;
@@ -102,13 +110,14 @@ void* pthread_pair1(void* arg){
 void* pthread_pair2(void* arg){
     int iter = (int)arg;
     char local = 0;
-    pthread_setaffinity();
+    pthread_setaffinity(pthread_mask);
     for(int i = 0; i < iter; i++){
         //consume
         pthread_mutex_lock(&pthread_lock);
         while(pthread_count == 0){
             pthread_cond_wait(&pthread_empty,&pthread_lock);
         }
+        DEBUGMSG("Critical Section : pair2 push\n");
         // fprintf(stderr,"[%s] from pair1\n", pthread_buf);
         // memset(pthread_buf,0,256);
         // pthread_buf = 0;
@@ -123,6 +132,7 @@ void* pthread_pair2(void* arg){
         while(pthread_count2 == 1){
             pthread_cond_wait(&pthread_full2,&pthread_lock2);
         }
+        DEBUGMSG("Critical Section : pair2 pull\n");
         // strncpy(pthread_buf, "Hello pair1!", 12);
         pthread_buf = local;
         pthread_count2 = 1;
